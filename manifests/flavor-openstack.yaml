@@ -1,0 +1,79 @@
+apiVersion: dicot.io/v1alpha1
+kind: Flavor
+metadata:
+  name: m1.tiny
+spec:
+  id: "1"
+  disabled: false
+  public: true
+  resources:
+    ephemeral_disk_mb: 0
+    root_disk_mb: 1024
+    swap_disk_mb: 0
+    memory_mb: 512
+    rxtx_factor: 1.0
+    cpu_count: 1
+---
+apiVersion: dicot.io/v1alpha1
+kind: Flavor
+metadata:
+  name: m1.small
+spec:
+  id: "2"
+  disabled: false
+  public: true
+  resources:
+    ephemeral_disk_mb: 0
+    root_disk_mb: 20480
+    swap_disk_mb: 0
+    memory_mb: 2048
+    rxtx_factor: 1.0
+    cpu_count: 1
+---
+apiVersion: dicot.io/v1alpha1
+kind: Flavor
+metadata:
+  name: m1.medium
+spec:
+  id: "3"
+  disabled: false
+  public: true
+  resources:
+    ephemeral_disk_mb: 0
+    root_disk_mb: 40960
+    swap_disk_mb: 0
+    memory_mb: 4096
+    rxtx_factor: 1.0
+    cpu_count: 2
+---
+apiVersion: dicot.io/v1alpha1
+kind: Flavor
+metadata:
+  name: m1.large
+spec:
+  id: "4"
+  disabled: false
+  public: true
+  resources:
+    ephemeral_disk_mb: 0
+    root_disk_mb: 81920
+    swap_disk_mb: 0
+    memory_mb: 8192
+    rxtx_factor: 1.0
+    cpu_count: 4
+---
+apiVersion: dicot.io/v1alpha1
+kind: Flavor
+metadata:
+  name: m1.xlarge
+spec:
+  id: "5"
+  disabled: false
+  public: true
+  resources:
+    ephemeral_disk_mb: 0
+    root_disk_mb: 163840
+    swap_disk_mb: 0
+    memory_mb: 16384
+    rxtx_factor: 1.0
+    cpu_count: 8
