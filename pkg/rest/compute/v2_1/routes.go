@@ -58,4 +58,9 @@ func (svc *service) RegisterRoutes(router *gin.Engine) {
 	router.GET(svc.Prefix+"/v2.1/flavors/:id/os-extra_specs/:key", svc.FlavorShowExtraSpec)
 	router.POST(svc.Prefix+"/v2.1/flavors/:id/os-extra_specs/:key", svc.FlavorCreateExtraSpec)
 	router.DELETE(svc.Prefix+"/v2.1/flavors/:id/os-extra_specs/:key", svc.FlavorDeleteExtraSpec)
+
+	router.GET(svc.Prefix+"/v2.1/os-keypairs", svc.KeypairList)
+	router.POST(svc.Prefix+"/v2.1/os-keypairs", svc.KeypairCreate)
+	router.GET(svc.Prefix+"/v2.1/os-keypairs/:name", svc.KeypairShow)
+	router.DELETE(svc.Prefix+"/v2.1/os-keypairs/:name", svc.KeypairDelete)
 }

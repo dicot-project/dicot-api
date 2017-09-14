@@ -43,6 +43,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(GroupVersion,
 		&Flavor{},
 		&FlavorList{},
+		&Keypair{},
+		&KeypairList{},
 	)
 	return nil
 }
@@ -105,5 +107,42 @@ func (vl *FlavorList) GetObjectKind() schema.ObjectKind {
 }
 
 func (vl *FlavorList) GetListMeta() metav1.List {
+	return &vl.ListMeta
+}
+
+type Keypair struct {
+	metav1.TypeMeta `json:",inline"`
+	ObjectMeta      metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec            KeypairSpec       `json:"spec,omitempty" valid:"required"`
+}
+
+type KeypairList struct {
+	metav1.TypeMeta `json:",inline"`
+	ListMeta        metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []Keypair       `json:"items"`
+}
+
+type KeypairSpec struct {
+	ID          uint64 `json:"id"`
+	Fingerprint string `json:"fingerprint"`
+	Type        string `json:"type"`
+	PublicKey   string `json:"public_key"`
+	UserID      string `json:"user_id"`
+	CreatedAt   string `json:"created_at"`
+}
+
+func (v *Keypair) GetObjectKind() schema.ObjectKind {
+	return &v.TypeMeta
+}
+
+func (v *Keypair) GetObjectMeta() metav1.Object {
+	return &v.ObjectMeta
+}
+
+func (vl *KeypairList) GetObjectKind() schema.ObjectKind {
+	return &vl.TypeMeta
+}
+
+func (vl *KeypairList) GetListMeta() metav1.List {
 	return &vl.ListMeta
 }
