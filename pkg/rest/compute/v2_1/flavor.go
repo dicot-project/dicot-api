@@ -21,7 +21,6 @@ package v2_1
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -72,30 +71,6 @@ type FlavorInfoDetail struct {
 	Swap       uint64  `json:"swap"`
 	RxTxFactor float64 `json:"rxtx_factor"`
 	Public     bool    `json:"os-flavor-access:is_public"`
-}
-
-func GetFilterUInt(c *gin.Context, name string) (bool, uint64) {
-	val := c.Query(name)
-	if name == "" {
-		return false, 0
-	}
-	res, err := strconv.ParseUint(val, 10, 0)
-	if err != nil {
-		return false, 0
-	}
-	return true, res
-}
-
-func GetFilterBool(c *gin.Context, name string) (bool, bool) {
-	val := c.Query(name)
-	if name == "" || name == "None" {
-		return false, false
-	}
-	res, err := strconv.ParseBool(val)
-	if err != nil {
-		return false, false
-	}
-	return true, res
 }
 
 func (svc *service) commonFlavorList(c *gin.Context) ([]v1.Flavor, bool) {
