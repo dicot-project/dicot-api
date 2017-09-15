@@ -50,28 +50,28 @@ func (svc *service) GetPrefix() string {
 	return svc.Prefix
 }
 
-func (svc *service) RegisterRoutes(router *gin.Engine) {
-	router.GET(svc.Prefix+"/", svc.IndexShow)
-	router.GET(svc.Prefix+"/v2.1", svc.VersionIndexShow)
+func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
+	router.GET("/", svc.IndexShow)
+	router.GET("/v2.1", svc.VersionIndexShow)
 
-	router.GET(svc.Prefix+"/v2.1/flavors", svc.FlavorList)
-	router.POST(svc.Prefix+"/v2.1/flavors", svc.FlavorCreate)
-	router.DELETE(svc.Prefix+"/v2.1/flavors/:id", svc.FlavorDelete)
-	//router.GET(svc.Prefix+"/v2.1/flavors/detail", svc.FlavorListDetail)
-	router.GET(svc.Prefix+"/v2.1/flavors/:id", svc.FlavorShow)
-	router.GET(svc.Prefix+"/v2.1/flavors/:id/os-extra_specs", svc.FlavorShowExtraSpecs)
-	router.POST(svc.Prefix+"/v2.1/flavors/:id/os-extra_specs", svc.FlavorCreateExtraSpecs)
-	router.GET(svc.Prefix+"/v2.1/flavors/:id/os-extra_specs/:key", svc.FlavorShowExtraSpec)
-	router.POST(svc.Prefix+"/v2.1/flavors/:id/os-extra_specs/:key", svc.FlavorCreateExtraSpec)
-	router.DELETE(svc.Prefix+"/v2.1/flavors/:id/os-extra_specs/:key", svc.FlavorDeleteExtraSpec)
+	router.GET("/v2.1/flavors", svc.FlavorList)
+	router.POST("/v2.1/flavors", svc.FlavorCreate)
+	router.DELETE("/v2.1/flavors/:id", svc.FlavorDelete)
+	//router.GET("/v2.1/flavors/detail", svc.FlavorListDetail)
+	router.GET("/v2.1/flavors/:id", svc.FlavorShow)
+	router.GET("/v2.1/flavors/:id/os-extra_specs", svc.FlavorShowExtraSpecs)
+	router.POST("/v2.1/flavors/:id/os-extra_specs", svc.FlavorCreateExtraSpecs)
+	router.GET("/v2.1/flavors/:id/os-extra_specs/:key", svc.FlavorShowExtraSpec)
+	router.POST("/v2.1/flavors/:id/os-extra_specs/:key", svc.FlavorCreateExtraSpec)
+	router.DELETE("/v2.1/flavors/:id/os-extra_specs/:key", svc.FlavorDeleteExtraSpec)
 
-	router.GET(svc.Prefix+"/v2.1/os-keypairs", svc.KeypairList)
-	router.POST(svc.Prefix+"/v2.1/os-keypairs", svc.KeypairCreate)
-	router.GET(svc.Prefix+"/v2.1/os-keypairs/:name", svc.KeypairShow)
-	router.DELETE(svc.Prefix+"/v2.1/os-keypairs/:name", svc.KeypairDelete)
+	router.GET("/v2.1/os-keypairs", svc.KeypairList)
+	router.POST("/v2.1/os-keypairs", svc.KeypairCreate)
+	router.GET("/v2.1/os-keypairs/:name", svc.KeypairShow)
+	router.DELETE("/v2.1/os-keypairs/:name", svc.KeypairDelete)
 
-	router.GET(svc.Prefix+"/v2.1/os-hypervisors", svc.HypervisorList)
-	//router.GET(svc.Prefix+"/v2.1/os-hypervisors/detail", svc.HypervisorList)
-	router.GET(svc.Prefix+"/v2.1/os-hypervisors/:name", svc.HypervisorShow)
+	router.GET("/v2.1/os-hypervisors", svc.HypervisorList)
+	//router.GET("/v2.1/os-hypervisors/detail", svc.HypervisorList)
+	router.GET("/v2.1/os-hypervisors/:name", svc.HypervisorShow)
 
 }

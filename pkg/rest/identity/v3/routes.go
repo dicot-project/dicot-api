@@ -43,7 +43,7 @@ func (svc *service) GetPrefix() string {
 	return svc.Prefix
 }
 
-func (svc *service) RegisterRoutes(router *gin.Engine) {
-	router.GET(svc.Prefix+"/v3", svc.IndexGet)
-	router.POST(svc.Prefix+"/v3/auth/tokens", svc.TokensPost)
+func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
+	router.GET("/v3", svc.IndexGet)
+	router.POST("/v3/auth/tokens", svc.TokensPost)
 }

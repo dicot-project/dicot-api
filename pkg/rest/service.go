@@ -24,7 +24,7 @@ import (
 )
 
 type Service interface {
-	RegisterRoutes(router *gin.Engine)
+	RegisterRoutes(router *gin.RouterGroup)
 	GetPrefix() string
 }
 
@@ -38,6 +38,7 @@ func (svcs *ServiceList) AddService(svc Service) {
 
 func (svcs *ServiceList) RegisterRoutes(router *gin.Engine) {
 	for _, svc := range svcs.Services {
-		svc.RegisterRoutes(router)
+		grp := router.Group(svc.GetPrefix())
+		svc.RegisterRoutes(grp)
 	}
 }
