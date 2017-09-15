@@ -51,6 +51,20 @@ func (svc *service) GetPrefix() string {
 }
 
 func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
+	mv := &rest.MicroVersionHandler{
+		Service:       "compute",
+		ServiceHeader: "X-OpenStack-Nova-API-Version",
+		Min: &rest.MicroVersion{
+			Major: 2,
+			Micro: 53,
+		},
+		Max: &rest.MicroVersion{
+			Major: 2,
+			Micro: 53,
+		},
+	}
+	router.Use(mv.Middleware())
+
 	router.GET("/", svc.IndexShow)
 	router.GET("/v2.1", svc.VersionIndexShow)
 
