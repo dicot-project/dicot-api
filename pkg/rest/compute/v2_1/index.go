@@ -23,6 +23,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
+	"github.com/dicot-project/dicot-api/pkg/rest"
 )
 
 type IndexRes struct {
@@ -40,7 +42,7 @@ type VersionInfo struct {
 	MinVersion string          `json:"min_version"`
 	Version    string          `json:"version"`
 	MediaTypes []MediaTypeInfo `json:"media-types"`
-	Links      []LinkInfo      `json:"links"`
+	Links      []rest.LinkInfo `json:"links"`
 }
 
 func (svc *service) IndexShow(c *gin.Context) {

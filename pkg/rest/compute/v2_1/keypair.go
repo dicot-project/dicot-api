@@ -30,11 +30,12 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api"
 	"github.com/dicot-project/dicot-api/pkg/api/v1"
 	"github.com/dicot-project/dicot-api/pkg/crypto"
+	"github.com/dicot-project/dicot-api/pkg/rest"
 )
 
 type KeypairListRes struct {
-	Keypairs []KeypairInfo `json:"keypairs"`
-	Links    []LinkInfo    `json:"keypair_links"`
+	Keypairs []KeypairInfo   `json:"keypairs"`
+	Links    []rest.LinkInfo `json:"keypair_links"`
 }
 
 type KeypairCreateReq struct {

@@ -29,6 +29,7 @@ import (
 
 	"github.com/dicot-project/dicot-api/pkg/api"
 	"github.com/dicot-project/dicot-api/pkg/api/v1"
+	"github.com/dicot-project/dicot-api/pkg/rest"
 )
 
 type FlavorCreateReq struct {
@@ -56,9 +57,9 @@ type FlavorExtraSpecsListRes struct {
 }
 
 type FlavorInfo struct {
-	ID    string     `json:"id"`
-	Name  string     `json:"name"`
-	Links []LinkInfo `json:"links"`
+	ID    string          `json:"id"`
+	Name  string          `json:"name"`
+	Links []rest.LinkInfo `json:"links"`
 }
 
 type FlavorInfoDetail struct {

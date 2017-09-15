@@ -27,11 +27,13 @@ import (
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/labels"
 	k8sv1 "k8s.io/client-go/pkg/api/v1"
+
+	"github.com/dicot-project/dicot-api/pkg/rest"
 )
 
 type HypervisorListRes struct {
 	Hypervisors []HypervisorInfo `json:"hypervisors"`
-	Links       []LinkInfo       `json:"hypervisor_links"`
+	Links       []rest.LinkInfo  `json:"hypervisor_links"`
 }
 
 type HypervisorInfo struct {
@@ -43,7 +45,7 @@ type HypervisorInfo struct {
 
 type HypervisorListDetailRes struct {
 	Hypervisors []HypervisorInfoDetail `json:"hypervisors"`
-	Links       []LinkInfo             `json:"hypervisor_links"`
+	Links       []rest.LinkInfo        `json:"hypervisor_links"`
 }
 
 type HypervisorShowRes struct {

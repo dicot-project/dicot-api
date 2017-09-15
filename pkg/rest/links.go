@@ -17,9 +17,10 @@
  *
  */
 
-package v2_1
+package rest
 
-type MediaTypeInfo struct {
-	Base string `json:"base"`
+type LinkInfo struct {
+	Rel  string `json:"rel"`
+	HRef string `json:"href"`
 	Type string `json:"type"`
 }
