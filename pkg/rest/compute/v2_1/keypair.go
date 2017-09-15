@@ -260,5 +260,5 @@ func (svc *service) KeypairDelete(c *gin.Context) {
 		return
 	}
 
-	c.String(http.StatusOK, "")
+	c.String(http.StatusNoContent, "")
 }
