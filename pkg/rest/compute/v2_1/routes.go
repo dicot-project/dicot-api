@@ -69,4 +69,9 @@ func (svc *service) RegisterRoutes(router *gin.Engine) {
 	router.POST(svc.Prefix+"/v2.1/os-keypairs", svc.KeypairCreate)
 	router.GET(svc.Prefix+"/v2.1/os-keypairs/:name", svc.KeypairShow)
 	router.DELETE(svc.Prefix+"/v2.1/os-keypairs/:name", svc.KeypairDelete)
+
+	router.GET(svc.Prefix+"/v2.1/os-hypervisors", svc.HypervisorList)
+	//router.GET(svc.Prefix+"/v2.1/os-hypervisors/detail", svc.HypervisorList)
+	router.GET(svc.Prefix+"/v2.1/os-hypervisors/:name", svc.HypervisorShow)
+
 }
