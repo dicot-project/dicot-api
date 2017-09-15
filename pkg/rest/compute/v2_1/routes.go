@@ -51,6 +51,9 @@ func (svc *service) GetPrefix() string {
 }
 
 func (svc *service) RegisterRoutes(router *gin.Engine) {
+	router.GET(svc.Prefix+"/", svc.IndexShow)
+	router.GET(svc.Prefix+"/v2.1", svc.VersionIndexShow)
+
 	router.GET(svc.Prefix+"/v2.1/flavors", svc.FlavorList)
 	router.POST(svc.Prefix+"/v2.1/flavors", svc.FlavorCreate)
 	router.DELETE(svc.Prefix+"/v2.1/flavors/:id", svc.FlavorDelete)

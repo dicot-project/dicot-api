@@ -22,4 +22,10 @@ package v2_1
 type LinkInfo struct {
 	Rel  string `json:"rel"`
 	HRef string `json:"href"`
+	Type string `json:"type"`
+}
+
+type MediaTypeInfo struct {
+	Base string `json:"base"`
+	Type string `json:"type"`
 }
