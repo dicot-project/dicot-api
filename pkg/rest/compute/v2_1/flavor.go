@@ -85,7 +85,7 @@ func (svc *service) commonFlavorList(c *gin.Context) ([]v1.Flavor, bool) {
 	// XXX Disallow unless user == admin
 	filterPublic, public := GetFilterBool(c, "isPublic")
 
-	clnt := api.NewFlavorClient(svc.Client, k8sv1.NamespaceDefault)
+	clnt := api.NewFlavorClient(svc.RESTClient, k8sv1.NamespaceDefault)
 
 	flavors, err := clnt.List()
 	if err != nil {
@@ -189,7 +189,7 @@ func (svc *service) FlavorShow(c *gin.Context) {
 		return
 	}
 
-	clnt := api.NewFlavorClient(svc.Client, k8sv1.NamespaceDefault)
+	clnt := api.NewFlavorClient(svc.RESTClient, k8sv1.NamespaceDefault)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
@@ -225,7 +225,7 @@ func (svc *service) FlavorShow(c *gin.Context) {
 func (svc *service) FlavorDelete(c *gin.Context) {
 	id := c.Param("id")
 
-	clnt := api.NewFlavorClient(svc.Client, k8sv1.NamespaceDefault)
+	clnt := api.NewFlavorClient(svc.RESTClient, k8sv1.NamespaceDefault)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
@@ -269,7 +269,7 @@ func (svc *service) FlavorCreate(c *gin.Context) {
 		return
 	}
 
-	clnt := api.NewFlavorClient(svc.Client, k8sv1.NamespaceDefault)
+	clnt := api.NewFlavorClient(svc.RESTClient, k8sv1.NamespaceDefault)
 
 	flavor, err := clnt.GetByID(req.Flavor.ID)
 	if err != nil {
@@ -330,7 +330,7 @@ func (svc *service) FlavorCreate(c *gin.Context) {
 func (svc *service) FlavorShowExtraSpecs(c *gin.Context) {
 	id := c.Param("id")
 
-	clnt := api.NewFlavorClient(svc.Client, k8sv1.NamespaceDefault)
+	clnt := api.NewFlavorClient(svc.RESTClient, k8sv1.NamespaceDefault)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
@@ -359,7 +359,7 @@ func (svc *service) FlavorCreateExtraSpecs(c *gin.Context) {
 
 	id := c.Param("id")
 
-	clnt := api.NewFlavorClient(svc.Client, k8sv1.NamespaceDefault)
+	clnt := api.NewFlavorClient(svc.RESTClient, k8sv1.NamespaceDefault)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
@@ -393,7 +393,7 @@ func (svc *service) FlavorShowExtraSpec(c *gin.Context) {
 	id := c.Param("id")
 	key := c.Param("key")
 
-	clnt := api.NewFlavorClient(svc.Client, k8sv1.NamespaceDefault)
+	clnt := api.NewFlavorClient(svc.RESTClient, k8sv1.NamespaceDefault)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
@@ -430,7 +430,7 @@ func (svc *service) FlavorCreateExtraSpec(c *gin.Context) {
 	id := c.Param("id")
 	key := c.Param("key")
 
-	clnt := api.NewFlavorClient(svc.Client, k8sv1.NamespaceDefault)
+	clnt := api.NewFlavorClient(svc.RESTClient, k8sv1.NamespaceDefault)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
@@ -468,7 +468,7 @@ func (svc *service) FlavorDeleteExtraSpec(c *gin.Context) {
 	id := c.Param("id")
 	key := c.Param("key")
 
-	clnt := api.NewFlavorClient(svc.Client, k8sv1.NamespaceDefault)
+	clnt := api.NewFlavorClient(svc.RESTClient, k8sv1.NamespaceDefault)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {

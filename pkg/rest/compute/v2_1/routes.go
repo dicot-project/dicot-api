@@ -21,25 +21,28 @@ package v2_1
 
 import (
 	"github.com/gin-gonic/gin"
+	k8s "k8s.io/client-go/kubernetes"
 	k8srest "k8s.io/client-go/rest"
 
 	"github.com/dicot-project/dicot-api/pkg/rest"
 )
 
 type service struct {
-	Client   *k8srest.RESTClient
-	Prefix   string
-	ServerID string
+	RESTClient *k8srest.RESTClient
+	Clientset  *k8s.Clientset
+	Prefix     string
+	ServerID   string
 }
 
-func NewService(cl *k8srest.RESTClient, serverID string, prefix string) rest.Service {
+func NewService(cl *k8srest.RESTClient, cls *k8s.Clientset, serverID string, prefix string) rest.Service {
 	if prefix == "" {
 		prefix = "/compute"
 	}
 	return &service{
-		Client:   cl,
-		Prefix:   prefix,
-		ServerID: serverID,
+		RESTClient: cl,
+		Clientset:  cls,
+		Prefix:     prefix,
+		ServerID:   serverID,
 	}
 }
 

@@ -33,6 +33,7 @@ import (
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
+	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	k8srest "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -50,7 +51,7 @@ func GetClientConfig(kubeconfig string) (*k8srest.Config, error) {
 	return k8srest.InClusterConfig()
 }
 
-func GetClient(kubeconfig string) (*k8srest.RESTClient, error) {
+func GetDicotClient(kubeconfig string) (*k8srest.RESTClient, error) {
 	config, err := GetClientConfig(kubeconfig)
 	if err != nil {
 		return nil, err
@@ -61,7 +62,21 @@ func GetClient(kubeconfig string) (*k8srest.RESTClient, error) {
 	config.APIPath = "/apis"
 	config.ContentType = runtime.ContentTypeJSON
 
-	return k8srest.RESTClientFor(config)
+	restclient, err := k8srest.RESTClientFor(config)
+	if err != nil {
+		return nil, err
+	}
+
+	return restclient, nil
+}
+
+func GetKubernetesClient(kubeconfig string) (*k8s.Clientset, error) {
+	config, err := GetClientConfig(kubeconfig)
+	if err != nil {
+		return nil, err
+	}
+
+	return k8s.NewForConfig(config)
 }
 
 func main() {
@@ -90,7 +105,11 @@ func main() {
 		router.Use(gin.Logger())
 	}
 
-	client, err := GetClient(kubeconfig)
+	restclient, err := GetDicotClient(kubeconfig)
+	if err != nil {
+		log.Fatal("Kube client: %s\n", err)
+	}
+	clientset, err := GetKubernetesClient(kubeconfig)
 	if err != nil {
 		log.Fatal("Kube client: %s\n", err)
 	}
@@ -99,7 +118,7 @@ func main() {
 
 	services := &rest.ServiceList{}
 	services.AddService(identityv3.NewService(services, ""))
-	services.AddService(computev2_1.NewService(client, serverID, ""))
+	services.AddService(computev2_1.NewService(restclient, clientset, serverID, ""))
 	services.RegisterRoutes(router)
 
 	srv := &http.Server{
