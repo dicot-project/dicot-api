@@ -44,10 +44,12 @@ import (
 
 	computeapiv1 "github.com/dicot-project/dicot-api/pkg/api/compute/v1"
 	identityapiv1 "github.com/dicot-project/dicot-api/pkg/api/identity/v1"
+	imageapiv1 "github.com/dicot-project/dicot-api/pkg/api/image/v1"
 	"github.com/dicot-project/dicot-api/pkg/auth"
 	"github.com/dicot-project/dicot-api/pkg/rest"
 	computev2_1 "github.com/dicot-project/dicot-api/pkg/rest/compute/v2_1"
 	identityv3 "github.com/dicot-project/dicot-api/pkg/rest/identity/v3"
+	imagev2 "github.com/dicot-project/dicot-api/pkg/rest/image/v2"
 )
 
 func GetClientConfig(kubeconfig string) (*k8srest.Config, error) {
@@ -82,6 +84,10 @@ func GetDicotIdentityClient(kubeconfig string) (*k8srest.RESTClient, error) {
 
 func GetDicotComputeClient(kubeconfig string) (*k8srest.RESTClient, error) {
 	return GetDicotClient(kubeconfig, &computeapiv1.GroupVersion)
+}
+
+func GetDicotImageClient(kubeconfig string) (*k8srest.RESTClient, error) {
+	return GetDicotClient(kubeconfig, &imageapiv1.GroupVersion)
 }
 
 func GetKubernetesClient(kubeconfig string) (*k8s.Clientset, error) {
@@ -138,6 +144,10 @@ func main() {
 	if err != nil {
 		log.Fatal("Kube client: %s\n", err)
 	}
+	imageclient, err := GetDicotImageClient(kubeconfig)
+	if err != nil {
+		log.Fatal("Kube client: %s\n", err)
+	}
 	k8sClient, err := GetKubernetesClient(kubeconfig)
 	if err != nil {
 		log.Fatal("Kube client: %s\n", err)
@@ -153,6 +163,7 @@ func main() {
 	services := &rest.ServiceList{}
 	services.AddService(identityv3.NewService(identityclient, k8sClient, tm, services, ""))
 	services.AddService(computev2_1.NewService(identityclient, computeclient, k8sClient, tm, serverID, ""))
+	services.AddService(imagev2.NewService(identityclient, imageclient, tm, serverID, ""))
 	services.RegisterRoutes(router)
 
 	srv := &http.Server{

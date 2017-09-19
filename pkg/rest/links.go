@@ -22,5 +22,5 @@ package rest
 type LinkInfo struct {
 	Rel  string `json:"rel"`
 	HRef string `json:"href"`
-	Type string `json:"type"`
+	Type string `json:"type,omitempty"`
 }

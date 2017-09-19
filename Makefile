@@ -24,6 +24,12 @@ conf/identity_admin: conf/identity_admin.in conf/admin-password.txt
 	PW=`cat conf/admin-password.txt` && \
 		sed -e "s,::ADMIN-PASSWORD::,$${PW}," < $< > $@ || rm $@
 
+load:
+	for i in manifests/*.yaml ; \
+	do \
+	    kubectl create -f $$i ; \
+	done
+
 manifests/050-identity-project.yaml: manifests/050-identity-project.yaml.in conf/admin-password.txt  bin/dicot-pwhash
 	PW=`bin/dicot-pwhash --password-file=conf/admin-password.txt` && \
 		sed -e "s,::ADMIN-PASSWORD::,$${PW}," < $< > $@ || rm $@
