@@ -36,16 +36,16 @@ type AuthInfo struct {
 }
 
 type AuthInfoScope struct {
-	Project ProjectInfo `json:"project"`
+	Project ProjectInfoRef `json:"project"`
 }
 
-type ProjectInfo struct {
-	ID     string     `json:"id"`
-	Name   string     `json:"name"`
-	Domain DomainInfo `json:"domain"`
+type ProjectInfoRef struct {
+	ID     string        `json:"id"`
+	Name   string        `json:"name"`
+	Domain DomainInfoRef `json:"domain"`
 }
 
-type DomainInfo struct {
+type DomainInfoRef struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
@@ -61,7 +61,7 @@ type AuthInfoToken struct {
 }
 
 type AuthInfoPassword struct {
-	User UserInfo `json:"user"`
+	User UserInfoRef `json:"user"`
 }
 
 type TokenRes struct {
@@ -73,10 +73,10 @@ type TokenInfo struct {
 	Roles     []RoleInfo         `json:"roles"`
 	ExpiresAt string             `json:"expires_at"`
 	IssuedAt  string             `json:"issued_at"`
-	Project   ProjectInfo        `json:"project"`
+	Project   ProjectInfoRef     `json:"project"`
 	IsDomain  bool               `json:"is_domain"`
 	Catalogs  []TokenInfoCatalog `json:"catalog"`
-	User      UserInfo           `json:"user"`
+	User      UserInfoRef        `json:"user"`
 	AuditIDs  []string           `json:"audit_ids"`
 	Extras    map[string]string  `json:"extras"`
 }
@@ -101,12 +101,12 @@ type RoleInfo struct {
 	Name string `json:"name"`
 }
 
-type UserInfo struct {
-	ID                string     `json:"id"`
-	Name              string     `json:"name"`
-	Domain            DomainInfo `json:"domain"`
-	Password          string     `json:"password"`
-	PasswordExpiresAt string     `json:"password_expires_at"`
+type UserInfoRef struct {
+	ID                string        `json:"id"`
+	Name              string        `json:"name"`
+	Domain            DomainInfoRef `json:"domain"`
+	Password          string        `json:"password"`
+	PasswordExpiresAt string        `json:"password_expires_at"`
 }
 
 func (svc *service) TokensPost(c *gin.Context) {
@@ -159,16 +159,16 @@ func (svc *service) TokensPost(c *gin.Context) {
 			AuditIDs: []string{
 				"f53cb656-94a7-11e7-b5b9-e4b318e0afce",
 			},
-			Project: ProjectInfo{
-				Domain: DomainInfo{
+			Project: ProjectInfoRef{
+				Domain: DomainInfoRef{
 					ID:   "f4ae7bf2-94a7-11e7-b158-e4b318e0afce",
 					Name: "default",
 				},
 				ID:   "324cd174-94a9-11e7-a705-e4b318e0afce",
 				Name: "demo",
 			},
-			User: UserInfo{
-				Domain: DomainInfo{
+			User: UserInfoRef{
+				Domain: DomainInfoRef{
 					ID:   "f4ae7bf2-94a7-11e7-b158-e4b318e0afce",
 					Name: "default",
 				},
