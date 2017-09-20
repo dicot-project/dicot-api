@@ -50,6 +50,18 @@ func (svc *service) GetPrefix() string {
 	return svc.Prefix
 }
 
+func (svc *service) GetName() string {
+	return "dicot-compute"
+}
+
+func (svc *service) GetType() string {
+	return "compute"
+}
+
+func (svc *service) GetUID() string {
+	return "f187c571-8a3d-455b-8846-1f373a2f6207"
+}
+
 func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
 	mv := &rest.MicroVersionHandler{
 		Service:       "compute",

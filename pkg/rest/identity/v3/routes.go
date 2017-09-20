@@ -35,12 +35,25 @@ func NewService(svcs *rest.ServiceList, prefix string) rest.Service {
 		prefix = "/identity/v3"
 	}
 	return &service{
-		Prefix: prefix,
+		Prefix:   prefix,
+		Services: svcs,
 	}
 }
 
 func (svc *service) GetPrefix() string {
 	return svc.Prefix
+}
+
+func (svc *service) GetName() string {
+	return "dicot-identity"
+}
+
+func (svc *service) GetType() string {
+	return "identity"
+}
+
+func (svc *service) GetUID() string {
+	return "f291d9c6-d70e-43a3-bde7-0051cd257f16"
 }
 
 func (svc *service) RegisterRoutes(router *gin.RouterGroup) {

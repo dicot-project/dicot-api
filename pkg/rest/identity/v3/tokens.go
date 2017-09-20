@@ -117,6 +117,33 @@ func (svc *service) TokensPost(c *gin.Context) {
 		return
 	}
 
+	catalog := []TokenInfoCatalog{}
+
+	interfaces := []string{
+		"internal", "admin", "public",
+	}
+
+	for _, service := range svc.Services.Services {
+		endpoints := []TokenInfoEndpoint{}
+
+		for _, iface := range interfaces {
+			endpoints = append(endpoints, TokenInfoEndpoint{
+				ID:        "4e7639cf-f78f-4cd2-aa2a-131196e25974",
+				URL:       "http://" + c.Request.Host + service.GetPrefix(),
+				Region:    "RegionOne",
+				RegionID:  "d3fd5ef9-7eff-422a-8df1-f2bc523d3381",
+				Interface: iface,
+			})
+		}
+
+		catalog = append(catalog, TokenInfoCatalog{
+			ID:        service.GetUID(),
+			Type:      service.GetType(),
+			Name:      service.GetName(),
+			Endpoints: endpoints,
+		})
+	}
+
 	res := &TokenRes{
 		Token: TokenInfo{
 			Methods: []string{"password"},
@@ -152,36 +179,7 @@ func (svc *service) TokensPost(c *gin.Context) {
 			Extras: map[string]string{
 				"fish": "food",
 			},
-			Catalogs: []TokenInfoCatalog{
-				TokenInfoCatalog{
-					ID:   "4e233f21-a1c3-44a7-a7a4-f27ceff4c1ee",
-					Type: "compute",
-					Name: "nova",
-					Endpoints: []TokenInfoEndpoint{
-						TokenInfoEndpoint{
-							ID:        "4e7639cf-f78f-4cd2-aa2a-131196e25974",
-							URL:       "http://" + c.Request.Host + "/compute/v2.1",
-							Region:    "RegionOne",
-							RegionID:  "d3fd5ef9-7eff-422a-8df1-f2bc523d3381",
-							Interface: "internal",
-						},
-						TokenInfoEndpoint{
-							ID:        "4e7639cf-f78f-4cd2-aa2a-131196e25974",
-							URL:       "http://" + c.Request.Host + "/compute/v2.1",
-							Region:    "RegionOne",
-							RegionID:  "d3fd5ef9-7eff-422a-8df1-f2bc523d3381",
-							Interface: "admin",
-						},
-						TokenInfoEndpoint{
-							ID:        "4e7639cf-f78f-4cd2-aa2a-131196e25974",
-							URL:       "http://" + c.Request.Host + "/compute/v2.1",
-							Region:    "RegionOne",
-							RegionID:  "d3fd5ef9-7eff-422a-8df1-f2bc523d3381",
-							Interface: "public",
-						},
-					},
-				},
-			},
+			Catalogs: catalog,
 		},
 	}
 	c.Header("X-Subject-Token", "b7bd6aba-62be-4e2d-adcb-4cfd6e8b7039")

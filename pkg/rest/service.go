@@ -26,6 +26,9 @@ import (
 type Service interface {
 	RegisterRoutes(router *gin.RouterGroup)
 	GetPrefix() string
+	GetName() string
+	GetType() string
+	GetUID() string
 }
 
 type ServiceList struct {
