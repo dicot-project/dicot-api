@@ -36,7 +36,7 @@ type service struct {
 
 func NewService(cl *k8srest.RESTClient, cls *k8s.Clientset, serverID string, prefix string) rest.Service {
 	if prefix == "" {
-		prefix = "/compute"
+		prefix = "/compute/v2.1"
 	}
 	return &service{
 		RESTClient: cl,
@@ -65,27 +65,27 @@ func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
 	}
 	router.Use(mv.Middleware())
 
-	router.GET("/", svc.IndexShow)
-	router.GET("/v2.1", svc.VersionIndexShow)
+	//router.GET("/", svc.IndexShow)
+	router.GET("/", svc.VersionIndexShow)
 
-	router.GET("/v2.1/flavors", svc.FlavorList)
-	router.POST("/v2.1/flavors", svc.FlavorCreate)
-	router.DELETE("/v2.1/flavors/:id", svc.FlavorDelete)
-	//router.GET("/v2.1/flavors/detail", svc.FlavorListDetail)
-	router.GET("/v2.1/flavors/:id", svc.FlavorShow)
-	router.GET("/v2.1/flavors/:id/os-extra_specs", svc.FlavorShowExtraSpecs)
-	router.POST("/v2.1/flavors/:id/os-extra_specs", svc.FlavorCreateExtraSpecs)
-	router.GET("/v2.1/flavors/:id/os-extra_specs/:key", svc.FlavorShowExtraSpec)
-	router.POST("/v2.1/flavors/:id/os-extra_specs/:key", svc.FlavorCreateExtraSpec)
-	router.DELETE("/v2.1/flavors/:id/os-extra_specs/:key", svc.FlavorDeleteExtraSpec)
+	router.GET("/flavors", svc.FlavorList)
+	router.POST("/flavors", svc.FlavorCreate)
+	router.DELETE("/flavors/:id", svc.FlavorDelete)
+	//router.GET("/flavors/detail", svc.FlavorListDetail)
+	router.GET("/flavors/:id", svc.FlavorShow)
+	router.GET("/flavors/:id/os-extra_specs", svc.FlavorShowExtraSpecs)
+	router.POST("/flavors/:id/os-extra_specs", svc.FlavorCreateExtraSpecs)
+	router.GET("/flavors/:id/os-extra_specs/:key", svc.FlavorShowExtraSpec)
+	router.POST("/flavors/:id/os-extra_specs/:key", svc.FlavorCreateExtraSpec)
+	router.DELETE("/flavors/:id/os-extra_specs/:key", svc.FlavorDeleteExtraSpec)
 
-	router.GET("/v2.1/os-keypairs", svc.KeypairList)
-	router.POST("/v2.1/os-keypairs", svc.KeypairCreate)
-	router.GET("/v2.1/os-keypairs/:name", svc.KeypairShow)
-	router.DELETE("/v2.1/os-keypairs/:name", svc.KeypairDelete)
+	router.GET("/os-keypairs", svc.KeypairList)
+	router.POST("/os-keypairs", svc.KeypairCreate)
+	router.GET("/os-keypairs/:name", svc.KeypairShow)
+	router.DELETE("/os-keypairs/:name", svc.KeypairDelete)
 
-	router.GET("/v2.1/os-hypervisors", svc.HypervisorList)
-	//router.GET("/v2.1/os-hypervisors/detail", svc.HypervisorList)
-	router.GET("/v2.1/os-hypervisors/:name", svc.HypervisorShow)
+	router.GET("/os-hypervisors", svc.HypervisorList)
+	//router.GET("/os-hypervisors/detail", svc.HypervisorList)
+	router.GET("/os-hypervisors/:name", svc.HypervisorShow)
 
 }

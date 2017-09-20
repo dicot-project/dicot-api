@@ -32,7 +32,7 @@ type service struct {
 
 func NewService(svcs *rest.ServiceList, prefix string) rest.Service {
 	if prefix == "" {
-		prefix = "/identity"
+		prefix = "/identity/v3"
 	}
 	return &service{
 		Prefix: prefix,
@@ -44,6 +44,6 @@ func (svc *service) GetPrefix() string {
 }
 
 func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
-	router.GET("/v3", svc.IndexGet)
-	router.POST("/v3/auth/tokens", svc.TokensPost)
+	router.GET("/", svc.IndexGet)
+	router.POST("/auth/tokens", svc.TokensPost)
 }
