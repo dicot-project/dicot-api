@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dicot-system
+---
+apiVersion: dicot.io/v1alpha1
+kind: Project
+metadata:
+  name: default
+  uid: bc26a4ec-42f0-4bf3-806e-18de431b11dc
+  namespace: dicot-system
+spec:
+  description: Default domain
+  enabled: true
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dicot-domain-default
+---
+apiVersion: dicot.io/v1alpha1
+kind: Project
+metadata:
+  name: default
+  namespace: dicot-domain-default
+spec:
+  parent: bc26a4ec-42f0-4bf3-806e-18de431b11dc
+  domain: bc26a4ec-42f0-4bf3-806e-18de431b11dc
+  description: Default project
+  enabled: true
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dicot-project-default-default

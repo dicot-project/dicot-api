@@ -21,22 +21,28 @@ package v3
 
 import (
 	"github.com/gin-gonic/gin"
+	k8s "k8s.io/client-go/kubernetes"
+	k8srest "k8s.io/client-go/rest"
 
 	"github.com/dicot-project/dicot-api/pkg/rest"
 )
 
 type service struct {
-	Prefix   string
-	Services *rest.ServiceList
+	RESTClient *k8srest.RESTClient
+	Clientset  *k8s.Clientset
+	Prefix     string
+	Services   *rest.ServiceList
 }
 
-func NewService(svcs *rest.ServiceList, prefix string) rest.Service {
+func NewService(cl *k8srest.RESTClient, cls *k8s.Clientset, svcs *rest.ServiceList, prefix string) rest.Service {
 	if prefix == "" {
 		prefix = "/identity/v3"
 	}
 	return &service{
-		Prefix:   prefix,
-		Services: svcs,
+		RESTClient: cl,
+		Clientset:  cls,
+		Prefix:     prefix,
+		Services:   svcs,
 	}
 }
 
@@ -59,4 +65,16 @@ func (svc *service) GetUID() string {
 func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
 	router.GET("/", svc.IndexGet)
 	router.POST("/auth/tokens", svc.TokensPost)
+
+	router.GET("/domains", svc.DomainList)
+	router.POST("/domains", svc.DomainCreate)
+	router.GET("/domains/:id", svc.DomainShow)
+	router.PATCH("/domains/:id", svc.DomainUpdate)
+	router.DELETE("/domains/:id", svc.DomainDelete)
+
+	router.GET("/projects", svc.ProjectList)
+	router.POST("/projects", svc.ProjectCreate)
+	router.GET("/projects/:id", svc.ProjectShow)
+	router.PATCH("/projects/:id", svc.ProjectUpdate)
+	router.DELETE("/projects/:id", svc.ProjectDelete)
 }

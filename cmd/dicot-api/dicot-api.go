@@ -117,7 +117,7 @@ func main() {
 	serverID := "e1552b45-f0cb-4d2b-bfb9-ae0877696e39"
 
 	services := &rest.ServiceList{}
-	services.AddService(identityv3.NewService(services, ""))
+	services.AddService(identityv3.NewService(restclient, clientset, services, ""))
 	services.AddService(computev2_1.NewService(restclient, clientset, serverID, ""))
 	services.RegisterRoutes(router)
 

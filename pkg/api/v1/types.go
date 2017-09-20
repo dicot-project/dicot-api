@@ -28,6 +28,8 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 )
 
+const NamespaceSystem = "dicot-system"
+
 const GroupName = "dicot.io"
 
 var GroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1alpha1"}
@@ -45,6 +47,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&FlavorList{},
 		&Keypair{},
 		&KeypairList{},
+		&Project{},
+		&ProjectList{},
 	)
 	return nil
 }
@@ -144,5 +148,41 @@ func (vl *KeypairList) GetObjectKind() schema.ObjectKind {
 }
 
 func (vl *KeypairList) GetListMeta() metav1.List {
+	return &vl.ListMeta
+}
+
+type Project struct {
+	metav1.TypeMeta `json:",inline"`
+	ObjectMeta      metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec            ProjectSpec       `json:"spec,omitempty" valid:"required"`
+}
+
+type ProjectList struct {
+	metav1.TypeMeta `json:",inline"`
+	ListMeta        metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []Project       `json:"items"`
+}
+
+type ProjectSpec struct {
+	Parent      string `json:"parent"`
+	Domain      string `json:"domain"`
+	Description string `json:"description"`
+	Enabled     bool   `json:"enabled"`
+	Namespace   string `json:"namespace"`
+}
+
+func (v *Project) GetObjectKind() schema.ObjectKind {
+	return &v.TypeMeta
+}
+
+func (v *Project) GetObjectMeta() metav1.Object {
+	return &v.ObjectMeta
+}
+
+func (vl *ProjectList) GetObjectKind() schema.ObjectKind {
+	return &vl.TypeMeta
+}
+
+func (vl *ProjectList) GetListMeta() metav1.List {
 	return &vl.ListMeta
 }
