@@ -20,12 +20,13 @@
 package api
 
 import (
-	"github.com/dicot-project/dicot-api/pkg/api/v1"
-
+	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
+
+	"github.com/dicot-project/dicot-api/pkg/api/v1"
 )
 
 func NewFlavorClient(cl *rest.RESTClient, namespace string) *FlavorClient {
@@ -79,7 +80,8 @@ func (f *FlavorClient) GetByID(id string) (*v1.Flavor, error) {
 			return &flv, nil
 		}
 	}
-	return nil, nil
+
+	return nil, errors.NewNotFound(v1.Resource("flavor"), id)
 }
 
 func (f *FlavorClient) List() (*v1.FlavorList, error) {

@@ -34,7 +34,9 @@ const GroupName = "dicot.io"
 
 var GroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1alpha1"}
 
-var FlavorGroupVersionKind = schema.GroupVersionKind{Group: GroupName, Version: GroupVersion.Version, Kind: "Flavor"}
+func Resource(resource string) schema.GroupResource {
+	return GroupVersion.WithResource(resource).GroupResource()
+}
 
 var (
 	groupFactoryRegistry = make(announced.APIGroupFactoryRegistry)

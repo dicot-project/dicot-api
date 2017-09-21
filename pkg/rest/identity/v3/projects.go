@@ -171,13 +171,14 @@ func (svc *service) ProjectCreate(c *gin.Context) {
 			if req.Project.DomainID != "" {
 				domain, err := domClnt.GetByUID(req.Project.DomainID)
 				if err != nil {
-					c.AbortWithError(http.StatusInternalServerError, err)
+					if errors.IsNotFound(err) {
+						c.AbortWithError(http.StatusBadRequest, err)
+					} else {
+						c.AbortWithError(http.StatusInternalServerError, err)
+					}
 					return
 				}
-				if domain == nil {
-					c.AbortWithStatus(http.StatusBadRequest)
-					return
-				}
+
 				domainName = domain.ObjectMeta.Name
 				domainID = string(domain.ObjectMeta.UID)
 			}
@@ -188,11 +189,11 @@ func (svc *service) ProjectCreate(c *gin.Context) {
 
 				parent, err := allProjClnt.GetByUID(req.Project.ParentID)
 				if err != nil {
-					c.AbortWithError(http.StatusInternalServerError, err)
-					return
-				}
-				if parent == nil {
-					c.AbortWithStatus(http.StatusBadRequest)
+					if errors.IsNotFound(err) {
+						c.AbortWithError(http.StatusBadRequest, err)
+					} else {
+						c.AbortWithError(http.StatusInternalServerError, err)
+					}
 					return
 				}
 
@@ -200,13 +201,14 @@ func (svc *service) ProjectCreate(c *gin.Context) {
 				if domainID == "" {
 					domain, err := domClnt.GetByUID(parent.Spec.Domain)
 					if err != nil {
-						c.AbortWithError(http.StatusInternalServerError, err)
+						if errors.IsNotFound(err) {
+							c.AbortWithError(http.StatusBadRequest, err)
+						} else {
+							c.AbortWithError(http.StatusInternalServerError, err)
+						}
 						return
 					}
-					if domain == nil {
-						c.AbortWithError(http.StatusInternalServerError, err)
-						return
-					}
+
 					domainID = string(domain.ObjectMeta.UID)
 					domainName = domain.ObjectMeta.Name
 				} else if domainID != parent.Spec.Domain {
@@ -285,11 +287,11 @@ func (svc *service) ProjectShow(c *gin.Context) {
 
 	project, err := clnt.GetByUID(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	if project == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusBadRequest, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -322,11 +324,11 @@ func (svc *service) ProjectUpdate(c *gin.Context) {
 
 	project, err := clnt.GetByUID(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	if project == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusBadRequest, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -367,11 +369,11 @@ func (svc *service) ProjectDelete(c *gin.Context) {
 
 	project, err := clnt.GetByUID(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	if project == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusBadRequest, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 

@@ -23,6 +23,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/uuid"
 	k8sv1 "k8s.io/client-go/pkg/api/v1"
@@ -194,12 +195,11 @@ func (svc *service) FlavorShow(c *gin.Context) {
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	if flavor == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -230,12 +230,11 @@ func (svc *service) FlavorDelete(c *gin.Context) {
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	if flavor == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -274,12 +273,11 @@ func (svc *service) FlavorCreate(c *gin.Context) {
 
 	flavor, err := clnt.GetByID(req.Flavor.ID)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	if flavor != nil {
-		c.AbortWithStatus(http.StatusConflict)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -335,12 +333,11 @@ func (svc *service) FlavorShowExtraSpecs(c *gin.Context) {
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	if flavor == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -364,12 +361,11 @@ func (svc *service) FlavorCreateExtraSpecs(c *gin.Context) {
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	if flavor == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -398,12 +394,11 @@ func (svc *service) FlavorShowExtraSpec(c *gin.Context) {
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	if flavor == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -435,12 +430,11 @@ func (svc *service) FlavorCreateExtraSpec(c *gin.Context) {
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	if flavor == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -473,12 +467,11 @@ func (svc *service) FlavorDeleteExtraSpec(c *gin.Context) {
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	if flavor == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 

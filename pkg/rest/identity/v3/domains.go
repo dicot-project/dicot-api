@@ -23,6 +23,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sv1 "k8s.io/client-go/pkg/api/v1"
 
@@ -165,11 +166,11 @@ func (svc *service) DomainShow(c *gin.Context) {
 
 	project, err := clnt.GetByUID(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	if project == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -200,11 +201,11 @@ func (svc *service) DomainUpdate(c *gin.Context) {
 
 	project, err := clnt.GetByUID(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	if project == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -241,11 +242,11 @@ func (svc *service) DomainDelete(c *gin.Context) {
 
 	project, err := clnt.GetByUID(id)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-	if project == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 

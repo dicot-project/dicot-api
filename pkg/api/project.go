@@ -22,13 +22,13 @@ package api
 import (
 	"fmt"
 
-	"github.com/dicot-project/dicot-api/pkg/api/v1"
-
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
+
+	"github.com/dicot-project/dicot-api/pkg/api/v1"
 )
 
 func NewProjectClient(cl *rest.RESTClient, namespace string) *ProjectClient {
@@ -90,7 +90,7 @@ func (pc *ProjectClient) GetByUID(uid string) (*v1.Project, error) {
 			return &project, nil
 		}
 	}
-	return nil, nil
+	return nil, errors.NewNotFound(v1.Resource("project"), uid)
 }
 
 func (pc *ProjectClient) Exists(name string) (bool, error) {
