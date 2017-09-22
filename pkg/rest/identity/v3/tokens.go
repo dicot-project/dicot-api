@@ -24,6 +24,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/dicot-project/dicot-api/pkg/api"
+	"github.com/dicot-project/dicot-api/pkg/api/v1"
+	"github.com/dicot-project/dicot-api/pkg/crypto"
 )
 
 type AuthReq struct {
@@ -114,6 +119,52 @@ func (svc *service) TokensPost(c *gin.Context) {
 	err := c.BindJSON(&req)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	pwAuth := false
+	for _, val := range req.Auth.Identity.Methods {
+		if val == "password" {
+			pwAuth = true
+			break
+		}
+	}
+	if !pwAuth {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	domain := req.Auth.Identity.Password.User.Domain.Name
+	namespace := api.FormatDomainNamespace(domain)
+
+	userClnt := api.NewUserClient(svc.RESTClient, namespace)
+
+	var user *v1.User
+	if req.Auth.Identity.Password.User.Name != "" {
+		user, err = userClnt.Get(req.Auth.Identity.Password.User.Name)
+	} else {
+		user, err = userClnt.GetByUID(req.Auth.Identity.Password.User.ID)
+	}
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	secret, err := svc.Clientset.CoreV1().Secrets(namespace).Get(user.Spec.Password.SecretRef, metav1.GetOptions{})
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	allowed, err := crypto.CheckPassword(
+		req.Auth.Identity.Password.User.Password,
+		string(secret.Data["password"]))
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+	if !allowed {
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
