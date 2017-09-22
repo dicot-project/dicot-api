@@ -1,5 +1,5 @@
 
-COMMANDS = dicot-api
+COMMANDS = dicot-api dicot-pwhash
 
 BINARIES = $(COMMANDS:%=bin/%s)
 
