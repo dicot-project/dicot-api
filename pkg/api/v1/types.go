@@ -51,6 +51,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&KeypairList{},
 		&Project{},
 		&ProjectList{},
+		&User{},
+		&UserList{},
 	)
 	return nil
 }
@@ -186,5 +188,48 @@ func (vl *ProjectList) GetObjectKind() schema.ObjectKind {
 }
 
 func (vl *ProjectList) GetListMeta() metav1.List {
+	return &vl.ListMeta
+}
+
+type User struct {
+	metav1.TypeMeta `json:",inline"`
+	ObjectMeta      metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec            UserSpec          `json:"spec,omitempty" valid:"required"`
+}
+
+type UserList struct {
+	metav1.TypeMeta `json:",inline"`
+	ListMeta        metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []User          `json:"items"`
+}
+
+type UserSpec struct {
+	Name             string       `json:"name"`
+	DomainID         string       `json:"domain_id"`
+	Enabled          bool         `json:"enabled"`
+	DefaultProjectID string       `json:"default_project_id"`
+	Password         UserPassword `json:"password"`
+	Description      string       `json:"description"`
+	EMail            string       `json:"email"`
+}
+
+type UserPassword struct {
+	SecretRef string `json:"secretRef"`
+	ExpiresAt string `json:"expiresAt"`
+}
+
+func (v *User) GetObjectKind() schema.ObjectKind {
+	return &v.TypeMeta
+}
+
+func (v *User) GetObjectMeta() metav1.Object {
+	return &v.ObjectMeta
+}
+
+func (vl *UserList) GetObjectKind() schema.ObjectKind {
+	return &vl.TypeMeta
+}
+
+func (vl *UserList) GetListMeta() metav1.List {
 	return &vl.ListMeta
 }

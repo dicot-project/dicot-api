@@ -3,7 +3,7 @@ COMMANDS = dicot-api dicot-pwhash
 
 BINARIES = $(COMMANDS:%=bin/%s)
 
-all: binaries
+all: binaries conf
 
 binaries: .vendor.status
 	go install ./pkg/...
@@ -14,6 +14,21 @@ binaries: .vendor.status
 		rm -f ./bin/$$c; \
 		ln -s $$GOPATH/bin/$$c ./bin/$$c; \
 	done
+
+$(BINARIES): binaries
+
+conf/admin-password.txt:
+	dd if=/dev/random bs=1 count=20 2>/dev/null | base64 > $@
+
+conf/identity_admin: conf/identity_admin.in conf/admin-password.txt
+	PW=`cat conf/admin-password.txt` && \
+		sed -e "s,::ADMIN-PASSWORD::,$${PW}," < $< > $@ || rm $@
+
+manifests/project-default.yaml: manifests/project-default.yaml.in conf/admin-password.txt  bin/dicot-pwhash
+	PW=`bin/dicot-pwhash --password-file=conf/admin-password.txt` && \
+		sed -e "s,::ADMIN-PASSWORD::,$${PW}," < $< > $@ || rm $@
+
+conf: manifests/project-default.yaml conf/identity_admin
 
 .vendor.status: glide.yaml glide.lock
 	glide install --strip-vendor && touch .vendor.status

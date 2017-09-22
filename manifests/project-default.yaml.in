@@ -11,6 +11,7 @@ metadata:
   namespace: dicot-system
 spec:
   description: Default domain
+  namespace: dicot-domain-default
   enabled: true
 ---
 apiVersion: v1
@@ -27,9 +28,32 @@ spec:
   parent: bc26a4ec-42f0-4bf3-806e-18de431b11dc
   domain: bc26a4ec-42f0-4bf3-806e-18de431b11dc
   description: Default project
+  namespace: dicot-project-default-default
   enabled: true
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
   name: dicot-project-default-default
+---
+apiVersion: dicot.io/v1alpha1
+kind: User
+metadata:
+  name: admin
+  namespace: dicot-domain-default
+spec:
+  domain_id: bc26a4ec-42f0-4bf3-806e-18de431b11dc
+  name: admin
+  enabled: true
+  password:
+    secretRef: user-password-admin
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: user-password-admin
+  namespace: dicot-domain-default
+type:
+  dicot.io/user-password
+data:
+  password: ::ADMIN-PASSWORD::

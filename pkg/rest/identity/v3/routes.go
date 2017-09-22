@@ -77,4 +77,10 @@ func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
 	router.GET("/projects/:id", svc.ProjectShow)
 	router.PATCH("/projects/:id", svc.ProjectUpdate)
 	router.DELETE("/projects/:id", svc.ProjectDelete)
+
+	router.GET("/users", svc.UserList)
+	router.POST("/users", svc.UserCreate)
+	router.GET("/users/:id", svc.UserShow)
+	router.PATCH("/users/:id", svc.UserUpdate)
+	router.DELETE("/users/:id", svc.UserDelete)
 }
