@@ -185,6 +185,8 @@ in conf/keystone_admin. This can be used with the standard
 OpenStack client tool
 
 ```bash
+sudo dnf install python-openstackclient
 . conf/identity_admin
-openstack project list
+openstack flavor list
+openstack flavor show m1.small
 ```
