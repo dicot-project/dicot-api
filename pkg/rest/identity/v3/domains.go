@@ -160,11 +160,11 @@ func (svc *service) DomainCreate(c *gin.Context) {
 }
 
 func (svc *service) DomainShow(c *gin.Context) {
-	id := c.Param("id")
+	domainID := c.Param("domainID")
 
 	clnt := identity.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
 
-	project, err := clnt.GetByUID(id)
+	project, err := clnt.GetByUID(domainID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			c.AbortWithError(http.StatusNotFound, err)
@@ -195,11 +195,11 @@ func (svc *service) DomainUpdate(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
+	domainID := c.Param("domainID")
 
 	clnt := identity.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
 
-	project, err := clnt.GetByUID(id)
+	project, err := clnt.GetByUID(domainID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			c.AbortWithError(http.StatusNotFound, err)
@@ -236,11 +236,11 @@ func (svc *service) DomainUpdate(c *gin.Context) {
 }
 
 func (svc *service) DomainDelete(c *gin.Context) {
-	id := c.Param("id")
+	domainID := c.Param("domainID")
 
 	clnt := identity.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
 
-	project, err := clnt.GetByUID(id)
+	project, err := clnt.GetByUID(domainID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			c.AbortWithError(http.StatusNotFound, err)

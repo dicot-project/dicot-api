@@ -219,11 +219,11 @@ func (svc *service) UserCreate(c *gin.Context) {
 }
 
 func (svc *service) UserShow(c *gin.Context) {
-	id := c.Param("id")
+	userID := c.Param("userID")
 
 	clnt := identity.NewUserClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
 
-	user, err := clnt.GetByUID(id)
+	user, err := clnt.GetByUID(userID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			c.AbortWithError(http.StatusNotFound, err)
@@ -260,11 +260,11 @@ func (svc *service) UserUpdate(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
+	userID := c.Param("userID")
 
 	clnt := identity.NewUserClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
 
-	user, err := clnt.GetByUID(id)
+	user, err := clnt.GetByUID(userID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			c.AbortWithError(http.StatusNotFound, err)
@@ -358,11 +358,11 @@ func (svc *service) UserUpdate(c *gin.Context) {
 }
 
 func (svc *service) UserDelete(c *gin.Context) {
-	id := c.Param("id")
+	userID := c.Param("userID")
 
 	clnt := identity.NewUserClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
 
-	user, err := clnt.GetByUID(id)
+	user, err := clnt.GetByUID(userID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			c.AbortWithError(http.StatusNotFound, err)

@@ -163,11 +163,11 @@ func (svc *service) GroupCreate(c *gin.Context) {
 }
 
 func (svc *service) GroupShow(c *gin.Context) {
-	id := c.Param("id")
+	groupID := c.Param("groupID")
 
 	clnt := identity.NewGroupClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
 
-	group, err := clnt.GetByUID(id)
+	group, err := clnt.GetByUID(groupID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			c.AbortWithError(http.StatusNotFound, err)
@@ -197,11 +197,11 @@ func (svc *service) GroupUpdate(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
+	groupID := c.Param("groupID")
 
 	clnt := identity.NewGroupClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
 
-	group, err := clnt.GetByUID(id)
+	group, err := clnt.GetByUID(groupID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			c.AbortWithError(http.StatusNotFound, err)
@@ -238,11 +238,11 @@ func (svc *service) GroupUpdate(c *gin.Context) {
 }
 
 func (svc *service) GroupDelete(c *gin.Context) {
-	id := c.Param("id")
+	groupID := c.Param("groupID")
 
 	clnt := identity.NewGroupClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
 
-	group, err := clnt.GetByUID(id)
+	group, err := clnt.GetByUID(groupID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			c.AbortWithError(http.StatusNotFound, err)

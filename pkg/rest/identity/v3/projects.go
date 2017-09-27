@@ -281,11 +281,11 @@ func (svc *service) ProjectCreate(c *gin.Context) {
 }
 
 func (svc *service) ProjectShow(c *gin.Context) {
-	id := c.Param("id")
+	projectID := c.Param("projectID")
 
 	clnt := identity.NewProjectClient(svc.RESTClient, k8sv1.NamespaceAll)
 
-	project, err := clnt.GetByUID(id)
+	project, err := clnt.GetByUID(projectID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			c.AbortWithError(http.StatusBadRequest, err)
@@ -318,11 +318,11 @@ func (svc *service) ProjectUpdate(c *gin.Context) {
 		return
 	}
 
-	id := c.Param("id")
+	projectID := c.Param("projectID")
 
 	clnt := identity.NewProjectClient(svc.RESTClient, k8sv1.NamespaceAll)
 
-	project, err := clnt.GetByUID(id)
+	project, err := clnt.GetByUID(projectID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			c.AbortWithError(http.StatusBadRequest, err)
@@ -363,11 +363,11 @@ func (svc *service) ProjectUpdate(c *gin.Context) {
 }
 
 func (svc *service) ProjectDelete(c *gin.Context) {
-	id := c.Param("id")
+	projectID := c.Param("projectID")
 
 	clnt := identity.NewProjectClient(svc.RESTClient, k8sv1.NamespaceAll)
 
-	project, err := clnt.GetByUID(id)
+	project, err := clnt.GetByUID(projectID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			c.AbortWithError(http.StatusBadRequest, err)
