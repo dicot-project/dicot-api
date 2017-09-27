@@ -49,6 +49,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&ProjectList{},
 		&User{},
 		&UserList{},
+		&Group{},
+		&GroupList{},
 	)
 	return nil
 }
@@ -145,5 +147,38 @@ func (vl *UserList) GetObjectKind() schema.ObjectKind {
 }
 
 func (vl *UserList) GetListMeta() metav1.List {
+	return &vl.ListMeta
+}
+
+type Group struct {
+	metav1.TypeMeta `json:",inline"`
+	ObjectMeta      metav1.ObjectMeta `json:"metadata,omitempty"`
+	Spec            GroupSpec         `json:"spec,omitempty" valid:"required"`
+}
+
+type GroupList struct {
+	metav1.TypeMeta `json:",inline"`
+	ListMeta        metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []Group         `json:"items"`
+}
+
+type GroupSpec struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+func (v *Group) GetObjectKind() schema.ObjectKind {
+	return &v.TypeMeta
+}
+
+func (v *Group) GetObjectMeta() metav1.Object {
+	return &v.ObjectMeta
+}
+
+func (vl *GroupList) GetObjectKind() schema.ObjectKind {
+	return &vl.TypeMeta
+}
+
+func (vl *GroupList) GetListMeta() metav1.List {
 	return &vl.ListMeta
 }

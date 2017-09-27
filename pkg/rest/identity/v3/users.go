@@ -162,7 +162,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 
 	pwSecret := &k8sv1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "user-password-" + identity.SanitizeUserName(req.User.Name),
+			Name: "user-password-" + identity.SanitizeName(req.User.Name),
 		},
 		Data: map[string][]byte{
 			"password": []byte(pwHash),
@@ -171,7 +171,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 
 	user := &v1.User{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: identity.SanitizeUserName(req.User.Name),
+			Name: identity.SanitizeName(req.User.Name),
 		},
 		Spec: v1.UserSpec{
 			Name:             req.User.Name,
