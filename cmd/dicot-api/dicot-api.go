@@ -32,13 +32,15 @@ import (
 	"github.com/golang/glog"
 	"github.com/spf13/pflag"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	k8s "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	k8srest "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/dicot-project/dicot-api/pkg/api/v1"
+	computeapiv1 "github.com/dicot-project/dicot-api/pkg/api/compute/v1"
+	identityapiv1 "github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 	"github.com/dicot-project/dicot-api/pkg/rest"
 	computev2_1 "github.com/dicot-project/dicot-api/pkg/rest/compute/v2_1"
 	identityv3 "github.com/dicot-project/dicot-api/pkg/rest/identity/v3"
@@ -51,13 +53,13 @@ func GetClientConfig(kubeconfig string) (*k8srest.Config, error) {
 	return k8srest.InClusterConfig()
 }
 
-func GetDicotClient(kubeconfig string) (*k8srest.RESTClient, error) {
+func GetDicotClient(kubeconfig string, version *schema.GroupVersion) (*k8srest.RESTClient, error) {
 	config, err := GetClientConfig(kubeconfig)
 	if err != nil {
 		return nil, err
 	}
 
-	config.GroupVersion = &v1.GroupVersion
+	config.GroupVersion = version
 	config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
 	config.APIPath = "/apis"
 	config.ContentType = runtime.ContentTypeJSON
@@ -68,6 +70,14 @@ func GetDicotClient(kubeconfig string) (*k8srest.RESTClient, error) {
 	}
 
 	return restclient, nil
+}
+
+func GetDicotIdentityClient(kubeconfig string) (*k8srest.RESTClient, error) {
+	return GetDicotClient(kubeconfig, &identityapiv1.GroupVersion)
+}
+
+func GetDicotComputeClient(kubeconfig string) (*k8srest.RESTClient, error) {
+	return GetDicotClient(kubeconfig, &computeapiv1.GroupVersion)
 }
 
 func GetKubernetesClient(kubeconfig string) (*k8s.Clientset, error) {
@@ -105,7 +115,11 @@ func main() {
 		router.Use(gin.Logger())
 	}
 
-	restclient, err := GetDicotClient(kubeconfig)
+	identityclient, err := GetDicotIdentityClient(kubeconfig)
+	if err != nil {
+		log.Fatal("Kube client: %s\n", err)
+	}
+	computeclient, err := GetDicotComputeClient(kubeconfig)
 	if err != nil {
 		log.Fatal("Kube client: %s\n", err)
 	}
@@ -117,8 +131,8 @@ func main() {
 	serverID := "e1552b45-f0cb-4d2b-bfb9-ae0877696e39"
 
 	services := &rest.ServiceList{}
-	services.AddService(identityv3.NewService(restclient, clientset, services, ""))
-	services.AddService(computev2_1.NewService(restclient, clientset, serverID, ""))
+	services.AddService(identityv3.NewService(identityclient, clientset, services, ""))
+	services.AddService(computev2_1.NewService(computeclient, clientset, serverID, ""))
 	services.RegisterRoutes(router)
 
 	srv := &http.Server{

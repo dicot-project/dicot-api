@@ -1,4 +1,4 @@
-apiVersion: dicot.io/v1alpha1
+apiVersion: compute.dicot.io/v1alpha1
 kind: Flavor
 metadata:
   name: m1.tiny
@@ -14,7 +14,7 @@ spec:
     rxtx_factor: 1.0
     cpu_count: 1
 ---
-apiVersion: dicot.io/v1alpha1
+apiVersion: compute.dicot.io/v1alpha1
 kind: Flavor
 metadata:
   name: m1.small
@@ -30,7 +30,7 @@ spec:
     rxtx_factor: 1.0
     cpu_count: 1
 ---
-apiVersion: dicot.io/v1alpha1
+apiVersion: compute.dicot.io/v1alpha1
 kind: Flavor
 metadata:
   name: m1.medium
@@ -46,7 +46,7 @@ spec:
     rxtx_factor: 1.0
     cpu_count: 2
 ---
-apiVersion: dicot.io/v1alpha1
+apiVersion: compute.dicot.io/v1alpha1
 kind: Flavor
 metadata:
   name: m1.large
@@ -62,7 +62,7 @@ spec:
     rxtx_factor: 1.0
     cpu_count: 4
 ---
-apiVersion: dicot.io/v1alpha1
+apiVersion: compute.dicot.io/v1alpha1
 kind: Flavor
 metadata:
   name: m1.xlarge

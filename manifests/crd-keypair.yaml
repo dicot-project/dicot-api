@@ -1,10 +1,10 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: keypairs.dicot.io
+  name: keypairs.compute.dicot.io
 spec:
   scope: Namespaced
-  group: dicot.io
+  group: compute.dicot.io
   version: v1alpha1
   names:
     kind: Keypair

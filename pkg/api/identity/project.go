@@ -17,7 +17,7 @@
  *
  */
 
-package api
+package identity
 
 import (
 	"fmt"
@@ -28,7 +28,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/dicot-project/dicot-api/pkg/api/v1"
+	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 )
 
 func NewProjectClient(cl *rest.RESTClient, namespace string) *ProjectClient {

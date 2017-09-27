@@ -17,16 +17,16 @@
  *
  */
 
-package api
+package compute
 
 import (
-	"github.com/dicot-project/dicot-api/pkg/api/v1"
-
 	"k8s.io/apimachinery/pkg/api/errors"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
+
+	"github.com/dicot-project/dicot-api/pkg/api/compute/v1"
 )
 
 func NewKeypairClient(cl *rest.RESTClient, namespace string) *KeypairClient {

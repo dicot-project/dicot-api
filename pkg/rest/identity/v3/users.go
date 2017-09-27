@@ -27,8 +27,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sv1 "k8s.io/client-go/pkg/api/v1"
 
-	"github.com/dicot-project/dicot-api/pkg/api"
-	"github.com/dicot-project/dicot-api/pkg/api/v1"
+	"github.com/dicot-project/dicot-api/pkg/api/identity"
+	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 	"github.com/dicot-project/dicot-api/pkg/crypto"
 	"github.com/dicot-project/dicot-api/pkg/rest"
 )
@@ -75,7 +75,7 @@ type UserShowRes struct {
 func (svc *service) UserList(c *gin.Context) {
 	name := c.Query("name")
 
-	clnt := api.NewUserClient(svc.RESTClient, api.FormatDomainNamespace("default"))
+	clnt := identity.NewUserClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
 
 	users, err := clnt.List()
 	if err != nil {
@@ -118,7 +118,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 		return
 	}
 
-	domClnt := api.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
+	domClnt := identity.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
 
 	var domNamespace string
 	if req.User.DomainID != "" {
@@ -142,7 +142,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 		domNamespace = dom.Spec.Namespace
 	}
 
-	clnt := api.NewUserClient(svc.RESTClient, domNamespace)
+	clnt := identity.NewUserClient(svc.RESTClient, domNamespace)
 
 	exists, err := clnt.Exists(req.User.Name)
 	if err != nil {
@@ -162,7 +162,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 
 	pwSecret := &k8sv1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "user-password-" + api.SanitizeUserName(req.User.Name),
+			Name: "user-password-" + identity.SanitizeUserName(req.User.Name),
 		},
 		Data: map[string][]byte{
 			"password": []byte(pwHash),
@@ -171,7 +171,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 
 	user := &v1.User{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: api.SanitizeUserName(req.User.Name),
+			Name: identity.SanitizeUserName(req.User.Name),
 		},
 		Spec: v1.UserSpec{
 			Name:             req.User.Name,
@@ -221,7 +221,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 func (svc *service) UserShow(c *gin.Context) {
 	id := c.Param("id")
 
-	clnt := api.NewUserClient(svc.RESTClient, api.FormatDomainNamespace("default"))
+	clnt := identity.NewUserClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
 
 	user, err := clnt.GetByUID(id)
 	if err != nil {
@@ -262,7 +262,7 @@ func (svc *service) UserUpdate(c *gin.Context) {
 
 	id := c.Param("id")
 
-	clnt := api.NewUserClient(svc.RESTClient, api.FormatDomainNamespace("default"))
+	clnt := identity.NewUserClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
 
 	user, err := clnt.GetByUID(id)
 	if err != nil {
@@ -360,7 +360,7 @@ func (svc *service) UserUpdate(c *gin.Context) {
 func (svc *service) UserDelete(c *gin.Context) {
 	id := c.Param("id")
 
-	clnt := api.NewUserClient(svc.RESTClient, api.FormatDomainNamespace("default"))
+	clnt := identity.NewUserClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
 
 	user, err := clnt.GetByUID(id)
 	if err != nil {

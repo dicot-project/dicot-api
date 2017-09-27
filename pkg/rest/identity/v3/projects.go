@@ -28,8 +28,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sv1 "k8s.io/client-go/pkg/api/v1"
 
-	"github.com/dicot-project/dicot-api/pkg/api"
-	"github.com/dicot-project/dicot-api/pkg/api/v1"
+	"github.com/dicot-project/dicot-api/pkg/api/identity"
+	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 	"github.com/dicot-project/dicot-api/pkg/rest"
 )
 
@@ -76,7 +76,7 @@ func (svc *service) ProjectList(c *gin.Context) {
 		isDom = false
 	}
 
-	clnt := api.NewProjectClient(svc.RESTClient, k8sv1.NamespaceAll)
+	clnt := identity.NewProjectClient(svc.RESTClient, k8sv1.NamespaceAll)
 
 	projects, err := clnt.List()
 	if err != nil {
@@ -131,8 +131,8 @@ func (svc *service) ProjectCreate(c *gin.Context) {
 	var parentID string
 	var domainID string
 	var namespace string
-	var clnt *api.ProjectClient
-	domClnt := api.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
+	var clnt *identity.ProjectClient
+	domClnt := identity.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
 	if req.Project.IsDomain {
 		exists, err := domClnt.Exists(req.Project.Name)
 		if err != nil {
@@ -150,7 +150,7 @@ func (svc *service) ProjectCreate(c *gin.Context) {
 		}
 
 		clnt = domClnt
-		namespace = api.FormatDomainNamespace(req.Project.Name)
+		namespace = identity.FormatDomainNamespace(req.Project.Name)
 	} else {
 		var domainName string
 		if req.Project.DomainID == "" && req.Project.ParentID == "" {
@@ -185,7 +185,7 @@ func (svc *service) ProjectCreate(c *gin.Context) {
 			if req.Project.ParentID == "" {
 				parentID = domainID
 			} else {
-				allProjClnt := api.NewProjectClient(svc.RESTClient, k8sv1.NamespaceAll)
+				allProjClnt := identity.NewProjectClient(svc.RESTClient, k8sv1.NamespaceAll)
 
 				parent, err := allProjClnt.GetByUID(req.Project.ParentID)
 				if err != nil {
@@ -218,8 +218,8 @@ func (svc *service) ProjectCreate(c *gin.Context) {
 			}
 		}
 
-		clnt = api.NewProjectClient(svc.RESTClient, api.FormatDomainNamespace(domainName))
-		namespace = api.FormatProjectNamespace(domainName, req.Project.Name)
+		clnt = identity.NewProjectClient(svc.RESTClient, identity.FormatDomainNamespace(domainName))
+		namespace = identity.FormatProjectNamespace(domainName, req.Project.Name)
 	}
 
 	project := &v1.Project{
@@ -283,7 +283,7 @@ func (svc *service) ProjectCreate(c *gin.Context) {
 func (svc *service) ProjectShow(c *gin.Context) {
 	id := c.Param("id")
 
-	clnt := api.NewProjectClient(svc.RESTClient, k8sv1.NamespaceAll)
+	clnt := identity.NewProjectClient(svc.RESTClient, k8sv1.NamespaceAll)
 
 	project, err := clnt.GetByUID(id)
 	if err != nil {
@@ -320,7 +320,7 @@ func (svc *service) ProjectUpdate(c *gin.Context) {
 
 	id := c.Param("id")
 
-	clnt := api.NewProjectClient(svc.RESTClient, k8sv1.NamespaceAll)
+	clnt := identity.NewProjectClient(svc.RESTClient, k8sv1.NamespaceAll)
 
 	project, err := clnt.GetByUID(id)
 	if err != nil {
@@ -332,7 +332,7 @@ func (svc *service) ProjectUpdate(c *gin.Context) {
 		return
 	}
 
-	clnt = api.NewProjectClient(svc.RESTClient, project.ObjectMeta.Namespace)
+	clnt = identity.NewProjectClient(svc.RESTClient, project.ObjectMeta.Namespace)
 
 	if req.Project.Name != nil {
 		c.AbortWithStatus(http.StatusForbidden)
@@ -365,7 +365,7 @@ func (svc *service) ProjectUpdate(c *gin.Context) {
 func (svc *service) ProjectDelete(c *gin.Context) {
 	id := c.Param("id")
 
-	clnt := api.NewProjectClient(svc.RESTClient, k8sv1.NamespaceAll)
+	clnt := identity.NewProjectClient(svc.RESTClient, k8sv1.NamespaceAll)
 
 	project, err := clnt.GetByUID(id)
 	if err != nil {
@@ -377,7 +377,7 @@ func (svc *service) ProjectDelete(c *gin.Context) {
 		return
 	}
 
-	clnt = api.NewProjectClient(svc.RESTClient, project.ObjectMeta.Namespace)
+	clnt = identity.NewProjectClient(svc.RESTClient, project.ObjectMeta.Namespace)
 
 	err = clnt.Delete(project.ObjectMeta.Name, nil)
 	if err != nil {

@@ -30,7 +30,7 @@ import (
 
 const NamespaceSystem = "dicot-system"
 
-const GroupName = "dicot.io"
+const GroupName = "identity.dicot.io"
 
 var GroupVersion = schema.GroupVersion{Group: GroupName, Version: "v1alpha1"}
 
@@ -45,10 +45,6 @@ var (
 
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(GroupVersion,
-		&Flavor{},
-		&FlavorList{},
-		&Keypair{},
-		&KeypairList{},
 		&Project{},
 		&ProjectList{},
 		&User{},
@@ -63,7 +59,7 @@ func init() {
 		&announced.GroupMetaFactoryArgs{
 			GroupName:              GroupName,
 			VersionPreferenceOrder: []string{GroupVersion.Version},
-			ImportPrefix:           "dicot.io/dicot/pkg/api/v1",
+			ImportPrefix:           "dicot.io/dicot/pkg/api/identity/v1",
 		},
 		announced.VersionToSchemeFunc{
 			GroupVersion.Version: SchemeBuilder.AddToScheme,
@@ -71,88 +67,6 @@ func init() {
 	).Announce(groupFactoryRegistry).RegisterAndEnable(registry, scheme.Scheme); err != nil {
 		panic(err)
 	}
-}
-
-type Flavor struct {
-	metav1.TypeMeta `json:",inline"`
-	ObjectMeta      metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec            FlavorSpec        `json:"spec,omitempty" valid:"required"`
-}
-
-type FlavorList struct {
-	metav1.TypeMeta `json:",inline"`
-	ListMeta        metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Flavor        `json:"items"`
-}
-
-type FlavorSpec struct {
-	ID         string            `json:"id"`
-	Disabled   bool              `json:"disabled"`
-	Public     bool              `json:"public"`
-	Resources  FlavorResources   `json:"resources"`
-	ExtraSpecs map[string]string `json:"extra_specs"`
-}
-
-type FlavorResources struct {
-	EphemeralDiskMB uint64  `json:"ephemeral_disk_mb"`
-	RootDiskMB      uint64  `json:"root_disk_mb"`
-	SwapDiskMB      uint64  `json:"swap_disk_mb"`
-	MemoryMB        uint64  `json:"memory_mb"`
-	CPUCount        uint64  `json:"cpu_count"`
-	RxTxFactor      float64 `json:"rxtx_factor"`
-}
-
-func (v *Flavor) GetObjectKind() schema.ObjectKind {
-	return &v.TypeMeta
-}
-
-func (v *Flavor) GetObjectMeta() metav1.Object {
-	return &v.ObjectMeta
-}
-
-func (vl *FlavorList) GetObjectKind() schema.ObjectKind {
-	return &vl.TypeMeta
-}
-
-func (vl *FlavorList) GetListMeta() metav1.List {
-	return &vl.ListMeta
-}
-
-type Keypair struct {
-	metav1.TypeMeta `json:",inline"`
-	ObjectMeta      metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec            KeypairSpec       `json:"spec,omitempty" valid:"required"`
-}
-
-type KeypairList struct {
-	metav1.TypeMeta `json:",inline"`
-	ListMeta        metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Keypair       `json:"items"`
-}
-
-type KeypairSpec struct {
-	ID          uint64 `json:"id"`
-	Fingerprint string `json:"fingerprint"`
-	Type        string `json:"type"`
-	PublicKey   string `json:"public_key"`
-	UserID      string `json:"user_id"`
-	CreatedAt   string `json:"created_at"`
-}
-
-func (v *Keypair) GetObjectKind() schema.ObjectKind {
-	return &v.TypeMeta
-}
-
-func (v *Keypair) GetObjectMeta() metav1.Object {
-	return &v.ObjectMeta
-}
-
-func (vl *KeypairList) GetObjectKind() schema.ObjectKind {
-	return &vl.TypeMeta
-}
-
-func (vl *KeypairList) GetListMeta() metav1.List {
-	return &vl.ListMeta
 }
 
 type Project struct {

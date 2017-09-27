@@ -17,7 +17,7 @@
  *
  */
 
-package api
+package compute
 
 import (
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -26,7 +26,7 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/dicot-project/dicot-api/pkg/api/v1"
+	"github.com/dicot-project/dicot-api/pkg/api/compute/v1"
 )
 
 func NewFlavorClient(cl *rest.RESTClient, namespace string) *FlavorClient {

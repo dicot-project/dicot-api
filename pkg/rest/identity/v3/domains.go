@@ -27,8 +27,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sv1 "k8s.io/client-go/pkg/api/v1"
 
-	"github.com/dicot-project/dicot-api/pkg/api"
-	"github.com/dicot-project/dicot-api/pkg/api/v1"
+	"github.com/dicot-project/dicot-api/pkg/api/identity"
+	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 	"github.com/dicot-project/dicot-api/pkg/rest"
 )
 
@@ -65,7 +65,7 @@ type DomainShowRes struct {
 func (svc *service) DomainList(c *gin.Context) {
 	name := c.Query("name")
 
-	clnt := api.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
+	clnt := identity.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
 
 	projects, err := clnt.List()
 	if err != nil {
@@ -104,7 +104,7 @@ func (svc *service) DomainCreate(c *gin.Context) {
 		return
 	}
 
-	clnt := api.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
+	clnt := identity.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
 
 	exists, err := clnt.Exists(req.Domain.Name)
 	if err != nil {
@@ -123,7 +123,7 @@ func (svc *service) DomainCreate(c *gin.Context) {
 		Spec: v1.ProjectSpec{
 			Enabled:     req.Domain.Enabled,
 			Description: req.Domain.Description,
-			Namespace:   api.FormatDomainNamespace(req.Domain.Name),
+			Namespace:   identity.FormatDomainNamespace(req.Domain.Name),
 		},
 	}
 
@@ -162,7 +162,7 @@ func (svc *service) DomainCreate(c *gin.Context) {
 func (svc *service) DomainShow(c *gin.Context) {
 	id := c.Param("id")
 
-	clnt := api.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
+	clnt := identity.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
 
 	project, err := clnt.GetByUID(id)
 	if err != nil {
@@ -197,7 +197,7 @@ func (svc *service) DomainUpdate(c *gin.Context) {
 
 	id := c.Param("id")
 
-	clnt := api.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
+	clnt := identity.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
 
 	project, err := clnt.GetByUID(id)
 	if err != nil {
@@ -238,7 +238,7 @@ func (svc *service) DomainUpdate(c *gin.Context) {
 func (svc *service) DomainDelete(c *gin.Context) {
 	id := c.Param("id")
 
-	clnt := api.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
+	clnt := identity.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
 
 	project, err := clnt.GetByUID(id)
 	if err != nil {

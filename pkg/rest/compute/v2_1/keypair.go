@@ -27,8 +27,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sv1 "k8s.io/client-go/pkg/api/v1"
 
-	"github.com/dicot-project/dicot-api/pkg/api"
-	"github.com/dicot-project/dicot-api/pkg/api/v1"
+	"github.com/dicot-project/dicot-api/pkg/api/compute"
+	"github.com/dicot-project/dicot-api/pkg/api/compute/v1"
 	"github.com/dicot-project/dicot-api/pkg/crypto"
 	"github.com/dicot-project/dicot-api/pkg/rest"
 )
@@ -78,7 +78,7 @@ func (svc *service) KeypairList(c *gin.Context) {
 	marker := c.Query("marker")
 	filterLimit, limit := GetFilterUInt(c, "limit")
 
-	clnt := api.NewKeypairClient(svc.RESTClient, k8sv1.NamespaceDefault)
+	clnt := compute.NewKeypairClient(svc.RESTClient, k8sv1.NamespaceDefault)
 
 	keypairs, err := clnt.List()
 	if err != nil {
@@ -137,7 +137,7 @@ func (svc *service) KeypairCreate(c *gin.Context) {
 		return
 	}
 
-	clnt := api.NewKeypairClient(svc.RESTClient, k8sv1.NamespaceDefault)
+	clnt := compute.NewKeypairClient(svc.RESTClient, k8sv1.NamespaceDefault)
 
 	exists, err := clnt.Exists(req.Keypair.Name)
 	if err != nil {
@@ -210,7 +210,7 @@ func (svc *service) KeypairCreate(c *gin.Context) {
 func (svc *service) KeypairShow(c *gin.Context) {
 	name := c.Param("name")
 
-	clnt := api.NewKeypairClient(svc.RESTClient, k8sv1.NamespaceDefault)
+	clnt := compute.NewKeypairClient(svc.RESTClient, k8sv1.NamespaceDefault)
 
 	keypair, err := clnt.Get(name)
 	if err != nil {
@@ -242,7 +242,7 @@ func (svc *service) KeypairShow(c *gin.Context) {
 func (svc *service) KeypairDelete(c *gin.Context) {
 	name := c.Param("name")
 
-	clnt := api.NewKeypairClient(svc.RESTClient, k8sv1.NamespaceDefault)
+	clnt := compute.NewKeypairClient(svc.RESTClient, k8sv1.NamespaceDefault)
 
 	keypair, err := clnt.Get(name)
 	if err != nil {

@@ -26,8 +26,8 @@ import (
 	"github.com/gin-gonic/gin"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/dicot-project/dicot-api/pkg/api"
-	"github.com/dicot-project/dicot-api/pkg/api/v1"
+	"github.com/dicot-project/dicot-api/pkg/api/identity"
+	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 	"github.com/dicot-project/dicot-api/pkg/crypto"
 )
 
@@ -135,9 +135,9 @@ func (svc *service) TokensPost(c *gin.Context) {
 	}
 
 	domain := req.Auth.Identity.Password.User.Domain.Name
-	namespace := api.FormatDomainNamespace(domain)
+	namespace := identity.FormatDomainNamespace(domain)
 
-	userClnt := api.NewUserClient(svc.RESTClient, namespace)
+	userClnt := identity.NewUserClient(svc.RESTClient, namespace)
 
 	var user *v1.User
 	if req.Auth.Identity.Password.User.Name != "" {
