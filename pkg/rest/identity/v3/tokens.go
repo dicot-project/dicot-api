@@ -180,7 +180,7 @@ func (svc *service) TokensPost(c *gin.Context) {
 		for _, iface := range interfaces {
 			endpoints = append(endpoints, TokenInfoEndpoint{
 				ID:        "4e7639cf-f78f-4cd2-aa2a-131196e25974",
-				URL:       "http://" + c.Request.Host + service.GetPrefix(),
+				URL:       "http://" + c.Request.Host + service.GetPrefix() + "/",
 				Region:    "RegionOne",
 				RegionID:  "d3fd5ef9-7eff-422a-8df1-f2bc523d3381",
 				Interface: iface,
