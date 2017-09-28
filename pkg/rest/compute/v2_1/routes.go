@@ -25,6 +25,7 @@ import (
 	k8srest "k8s.io/client-go/rest"
 
 	"github.com/dicot-project/dicot-api/pkg/rest"
+	"github.com/dicot-project/dicot-api/pkg/rest/middleware"
 )
 
 type service struct {
@@ -63,14 +64,14 @@ func (svc *service) GetUID() string {
 }
 
 func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
-	mv := &rest.MicroVersionHandler{
+	mv := &middleware.MicroVersionHandler{
 		Service:       "compute",
 		ServiceHeader: "X-OpenStack-Nova-API-Version",
-		Min: &rest.MicroVersion{
+		Min: &middleware.MicroVersion{
 			Major: 2,
 			Micro: 53,
 		},
-		Max: &rest.MicroVersion{
+		Max: &middleware.MicroVersion{
 			Major: 2,
 			Micro: 53,
 		},

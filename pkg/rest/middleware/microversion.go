@@ -17,7 +17,7 @@
  *
  */
 
-package rest
+package middleware
 
 import (
 	"fmt"
@@ -27,6 +27,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
+
+	"github.com/dicot-project/dicot-api/pkg/rest"
 )
 
 type MicroVersionErrorRes struct {
@@ -34,14 +36,14 @@ type MicroVersionErrorRes struct {
 }
 
 type MicroVersionErrorInfo struct {
-	RequestID  string     `json:"request_id"`
-	Code       string     `json:"code"`
-	Status     uint       `json:"status"`
-	Title      string     `json:"title"`
-	Detail     string     `json:"detail"`
-	MaxVersion string     `json:"max_version"`
-	MinVersion string     `json:"min_version"`
-	Links      []LinkInfo `json:"links"`
+	RequestID  string          `json:"request_id"`
+	Code       string          `json:"code"`
+	Status     uint            `json:"status"`
+	Title      string          `json:"title"`
+	Detail     string          `json:"detail"`
+	MaxVersion string          `json:"max_version"`
+	MinVersion string          `json:"min_version"`
+	Links      []rest.LinkInfo `json:"links"`
 }
 
 type MicroVersion struct {
@@ -167,8 +169,8 @@ func (h *MicroVersionHandler) Middleware() gin.HandlerFunc {
 					Detail:     fmt.Sprintf("Version %s is not supported by the API. Minimum is %s and maximum is %s.", got.String(), h.Min.String(), h.Max.String()),
 					MaxVersion: h.Max.String(),
 					MinVersion: h.Min.String(),
-					Links: []LinkInfo{
-						LinkInfo{
+					Links: []rest.LinkInfo{
+						rest.LinkInfo{
 							Rel:  "help",
 							HRef: "http://developer.openstack.org/api-guide/compute/microversions.html",
 						},
