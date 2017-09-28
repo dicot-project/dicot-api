@@ -89,4 +89,8 @@ func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
 	router.GET("/groups/:groupID", svc.GroupShow)
 	router.PATCH("/groups/:groupID", svc.GroupUpdate)
 	router.DELETE("/groups/:groupID", svc.GroupDelete)
+	router.GET("/groups/:groupID/users", svc.GroupUserList)
+	router.PUT("/groups/:groupID/users/:userID", svc.GroupUserAdd)
+	router.HEAD("/groups/:groupID/users/:userID", svc.GroupUserCheck)
+	router.DELETE("/groups/:groupID/users/:userID", svc.GroupUserDelete)
 }

@@ -163,8 +163,9 @@ type GroupList struct {
 }
 
 type GroupSpec struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	UserIDs     []string `json:"user_ids"`
 }
 
 func (v *Group) GetObjectKind() schema.ObjectKind {

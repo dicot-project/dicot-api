@@ -35,10 +35,11 @@ type GroupListRes struct {
 }
 
 type GroupInfo struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	DomainID    string `json:"domain_id"`
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	DomainID    string   `json:"domain_id"`
+	Links       LinkInfo `json:"links"`
 }
 
 type GroupCreateReq struct {
@@ -57,6 +58,10 @@ type GroupUpdateInfo struct {
 
 type GroupShowRes struct {
 	Group GroupInfo `json:"group"`
+}
+
+type GroupUserListRes struct {
+	Users []UserInfo `json:"users"`
 }
 
 func (svc *service) GroupList(c *gin.Context) {
@@ -259,4 +264,179 @@ func (svc *service) GroupDelete(c *gin.Context) {
 	}
 
 	c.String(http.StatusNoContent, "")
+}
+
+func (svc *service) GroupUserList(c *gin.Context) {
+	groupID := c.Param("groupID")
+
+	groupClnt := identity.NewGroupClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
+
+	group, err := groupClnt.GetByUID(groupID)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	members := make(map[string]bool)
+	for _, id := range group.Spec.UserIDs {
+		members[id] = true
+	}
+
+	userClnt := identity.NewUserClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
+	users, err := userClnt.List()
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	res := GroupUserListRes{
+		Users: []UserInfo{},
+	}
+
+	for _, user := range users.Items {
+		_, ok := members[string(user.ObjectMeta.UID)]
+		if !ok {
+			continue
+		}
+
+		info := UserInfo{
+			ID:               string(user.ObjectMeta.UID),
+			Name:             user.Spec.Name,
+			Enabled:          user.Spec.Enabled,
+			DomainID:         user.Spec.DomainID,
+			DefaultProjectID: user.Spec.DefaultProjectID,
+		}
+		if user.Spec.Password.ExpiresAt != "" {
+			info.PasswordExpiresAt = &user.Spec.Password.ExpiresAt
+		}
+		res.Users = append(res.Users, info)
+	}
+
+	c.JSON(http.StatusOK, res)
+}
+
+func (svc *service) GroupUserAdd(c *gin.Context) {
+	groupID := c.Param("groupID")
+	userID := c.Param("userID")
+
+	groupClnt := identity.NewGroupClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
+
+	group, err := groupClnt.GetByUID(groupID)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	userClnt := identity.NewUserClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
+	user, err := userClnt.GetByUID(userID)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	found := false
+	for _, id := range group.Spec.UserIDs {
+		if id == string(user.ObjectMeta.UID) {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		group.Spec.UserIDs = append(group.Spec.UserIDs, string(user.ObjectMeta.UID))
+
+		group, err = groupClnt.Update(group)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	c.String(http.StatusOK, "")
+}
+
+func (svc *service) GroupUserCheck(c *gin.Context) {
+	groupID := c.Param("groupID")
+	userID := c.Param("userID")
+
+	groupClnt := identity.NewGroupClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
+
+	group, err := groupClnt.GetByUID(groupID)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	/*
+	 * Intentionally not checking if user referenced by userID
+	 * actually exists anymore
+	 */
+
+	found := false
+	for _, id := range group.Spec.UserIDs {
+		if id == userID {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		c.String(http.StatusNotFound, "")
+	} else {
+		c.String(http.StatusOK, "")
+	}
+}
+
+func (svc *service) GroupUserDelete(c *gin.Context) {
+	groupID := c.Param("groupID")
+	userID := c.Param("userID")
+
+	groupClnt := identity.NewGroupClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
+
+	group, err := groupClnt.GetByUID(groupID)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	/*
+	 * Intentionally not checking if user referenced by userID
+	 * actually exists anymore
+	 */
+
+	ids := []string{}
+	for _, id := range group.Spec.UserIDs {
+		if id != userID {
+			ids = append(ids, id)
+		}
+	}
+	group.Spec.UserIDs = ids
+
+	group, err = groupClnt.Update(group)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.String(http.StatusOK, "")
 }
