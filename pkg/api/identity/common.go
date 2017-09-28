@@ -23,9 +23,10 @@ import (
 	"regexp"
 )
 
-var sanitizeNameRE = regexp.MustCompile("[^-.a-z]")
+var sanitizeNameRE = regexp.MustCompile("[^-.a-z0-9]")
 
 func SanitizeName(name string) string {
+	// XXX must not start / end with '-'
 	return string(sanitizeNameRE.ReplaceAllLiteral(
 		[]byte(name), []byte("-")))
 }
