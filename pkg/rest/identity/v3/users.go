@@ -46,8 +46,8 @@ type UserInfo struct {
 	PasswordExpiresAt *string       `json:"password_expires_at"`
 	DefaultProjectID  string        `json:"default_project_id,omitempty"`
 	Links             rest.LinkInfo `json:"links"`
-	Description       string        `json:"description"`
-	EMail             string        `json:"email"`
+	Description       string        `json:"description,omitempty"`
+	EMail             string        `json:"email,omitempty"`
 }
 
 type UserCreateReq struct {
