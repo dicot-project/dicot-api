@@ -51,6 +51,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&UserList{},
 		&Group{},
 		&GroupList{},
+		&RevokedToken{},
+		&RevokedTokenList{},
 	)
 	return nil
 }
@@ -181,5 +183,33 @@ func (vl *GroupList) GetObjectKind() schema.ObjectKind {
 }
 
 func (vl *GroupList) GetListMeta() metav1.List {
+	return &vl.ListMeta
+}
+
+type RevokedToken struct {
+	metav1.TypeMeta `json:",inline"`
+	ObjectMeta      metav1.ObjectMeta `json:"metadata,omitempty"`
+	Expiry          string            `json:"expiry"`
+}
+
+type RevokedTokenList struct {
+	metav1.TypeMeta `json:",inline"`
+	ListMeta        metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []RevokedToken  `json:"items"`
+}
+
+func (v *RevokedToken) GetObjectKind() schema.ObjectKind {
+	return &v.TypeMeta
+}
+
+func (v *RevokedToken) GetObjectMeta() metav1.Object {
+	return &v.ObjectMeta
+}
+
+func (vl *RevokedTokenList) GetObjectKind() schema.ObjectKind {
+	return &vl.TypeMeta
+}
+
+func (vl *RevokedTokenList) GetListMeta() metav1.List {
 	return &vl.ListMeta
 }
