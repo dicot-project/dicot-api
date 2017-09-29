@@ -21,6 +21,9 @@ package main
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"flag"
 	"log"
 	"net/http"
@@ -41,6 +44,7 @@ import (
 
 	computeapiv1 "github.com/dicot-project/dicot-api/pkg/api/compute/v1"
 	identityapiv1 "github.com/dicot-project/dicot-api/pkg/api/identity/v1"
+	"github.com/dicot-project/dicot-api/pkg/auth"
 	"github.com/dicot-project/dicot-api/pkg/rest"
 	computev2_1 "github.com/dicot-project/dicot-api/pkg/rest/compute/v2_1"
 	identityv3 "github.com/dicot-project/dicot-api/pkg/rest/identity/v3"
@@ -89,6 +93,17 @@ func GetKubernetesClient(kubeconfig string) (*k8s.Clientset, error) {
 	return k8s.NewForConfig(config)
 }
 
+func GetTokenManager(cl *k8srest.RESTClient) (auth.TokenManager, error) {
+	key, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	if err != nil {
+		return nil, err
+	}
+
+	return auth.NewTokenManager([]interface{}{
+		key,
+	}, time.Hour, cl), nil
+}
+
 func main() {
 	var debug bool
 	var logRequests bool
@@ -128,11 +143,16 @@ func main() {
 		log.Fatal("Kube client: %s\n", err)
 	}
 
+	tm, err := GetTokenManager(identityclient)
+	if err != nil {
+		log.Fatal("Token manager: %s\n", err)
+	}
+
 	serverID := "e1552b45-f0cb-4d2b-bfb9-ae0877696e39"
 
 	services := &rest.ServiceList{}
-	services.AddService(identityv3.NewService(identityclient, clientset, services, ""))
-	services.AddService(computev2_1.NewService(computeclient, clientset, serverID, ""))
+	services.AddService(identityv3.NewService(identityclient, clientset, tm, services, ""))
+	services.AddService(computev2_1.NewService(computeclient, clientset, tm, serverID, ""))
 	services.RegisterRoutes(router)
 
 	srv := &http.Server{

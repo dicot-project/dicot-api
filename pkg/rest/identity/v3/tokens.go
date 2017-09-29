@@ -25,9 +25,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/uuid"
 
 	"github.com/dicot-project/dicot-api/pkg/api/identity"
 	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
+	"github.com/dicot-project/dicot-api/pkg/auth"
 	"github.com/dicot-project/dicot-api/pkg/crypto"
 )
 
@@ -134,8 +136,25 @@ func (svc *service) TokensPost(c *gin.Context) {
 		return
 	}
 
-	domain := req.Auth.Identity.Password.User.Domain.Name
-	namespace := identity.FormatDomainNamespace(domain)
+	domClnt := identity.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
+	var domain *v1.Project
+	if req.Auth.Identity.Password.User.Domain.Name != "" {
+		domain, err = domClnt.Get(req.Auth.Identity.Password.User.Domain.Name)
+		if err != nil {
+			c.AbortWithError(http.StatusUnauthorized, err)
+			return
+		}
+	} else if req.Auth.Identity.Password.User.Domain.ID != "" {
+		domain, err = domClnt.GetByUID(req.Auth.Identity.Password.User.Domain.ID)
+		if err != nil {
+			c.AbortWithError(http.StatusUnauthorized, err)
+			return
+		}
+	} else {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	namespace := identity.FormatDomainNamespace(domain.ObjectMeta.Name)
 
 	userClnt := identity.NewUserClient(svc.RESTClient, namespace)
 
@@ -165,6 +184,22 @@ func (svc *service) TokensPost(c *gin.Context) {
 	}
 	if !allowed {
 		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	token := svc.TokenManager.NewToken()
+	token.Subject = auth.TokenSubject{
+		DomainName: domain.ObjectMeta.Name,
+		UserName:   user.ObjectMeta.Name,
+	}
+	token.Scope = auth.TokenScope{
+		DomainName:  "",
+		ProjectName: "",
+	}
+
+	tokensig, err := svc.TokenManager.SignToken(token)
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
 
@@ -204,11 +239,11 @@ func (svc *service) TokensPost(c *gin.Context) {
 					Name: "admin",
 				},
 			},
-			IssuedAt:  time.Now().Format(time.RFC3339),
-			ExpiresAt: time.Now().Add(1 * time.Hour).Format(time.RFC3339),
+			IssuedAt:  token.Issued.Format(time.RFC3339),
+			ExpiresAt: token.Expiry.Format(time.RFC3339),
 			IsDomain:  false,
 			AuditIDs: []string{
-				"f53cb656-94a7-11e7-b5b9-e4b318e0afce",
+				string(uuid.NewUUID()),
 			},
 			Project: ProjectInfoRef{
 				Domain: DomainInfoRef{
@@ -220,11 +255,11 @@ func (svc *service) TokensPost(c *gin.Context) {
 			},
 			User: UserInfoRef{
 				Domain: DomainInfoRef{
-					ID:   "f4ae7bf2-94a7-11e7-b158-e4b318e0afce",
-					Name: "default",
+					ID:   string(domain.ObjectMeta.UID),
+					Name: domain.ObjectMeta.Name,
 				},
-				ID:                "f4e4b5d2-94a7-11e7-99a0-e4b318e0afce",
-				Name:              "admin",
+				ID:                string(user.ObjectMeta.UID),
+				Name:              user.Spec.Name,
 				PasswordExpiresAt: time.Now().Add(10 * time.Minute).Format(time.RFC3339),
 			},
 			Extras: map[string]string{
@@ -233,6 +268,6 @@ func (svc *service) TokensPost(c *gin.Context) {
 			Catalogs: catalog,
 		},
 	}
-	c.Header("X-Subject-Token", "b7bd6aba-62be-4e2d-adcb-4cfd6e8b7039")
+	c.Header("X-Subject-Token", tokensig)
 	c.JSON(http.StatusOK, res)
 }

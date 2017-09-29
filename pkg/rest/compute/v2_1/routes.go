@@ -24,26 +24,29 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 	k8srest "k8s.io/client-go/rest"
 
+	"github.com/dicot-project/dicot-api/pkg/auth"
 	"github.com/dicot-project/dicot-api/pkg/rest"
 	"github.com/dicot-project/dicot-api/pkg/rest/middleware"
 )
 
 type service struct {
-	RESTClient *k8srest.RESTClient
-	Clientset  *k8s.Clientset
-	Prefix     string
-	ServerID   string
+	RESTClient   *k8srest.RESTClient
+	Clientset    *k8s.Clientset
+	Prefix       string
+	ServerID     string
+	TokenManager auth.TokenManager
 }
 
-func NewService(cl *k8srest.RESTClient, cls *k8s.Clientset, serverID string, prefix string) rest.Service {
+func NewService(cl *k8srest.RESTClient, cls *k8s.Clientset, tm auth.TokenManager, serverID string, prefix string) rest.Service {
 	if prefix == "" {
 		prefix = "/compute/v2.1"
 	}
 	return &service{
-		RESTClient: cl,
-		Clientset:  cls,
-		Prefix:     prefix,
-		ServerID:   serverID,
+		RESTClient:   cl,
+		Clientset:    cls,
+		Prefix:       prefix,
+		ServerID:     serverID,
+		TokenManager: tm,
 	}
 }
 
@@ -77,6 +80,11 @@ func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
 		},
 	}
 	router.Use(mv.Middleware())
+
+	tok := &middleware.TokenHandler{
+		TokenManager: svc.TokenManager,
+	}
+	router.Use(tok.Middleware())
 
 	//router.GET("/", svc.IndexShow)
 	router.GET("/", svc.VersionIndexShow)

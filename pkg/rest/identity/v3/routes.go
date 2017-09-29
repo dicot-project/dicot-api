@@ -24,25 +24,28 @@ import (
 	k8s "k8s.io/client-go/kubernetes"
 	k8srest "k8s.io/client-go/rest"
 
+	"github.com/dicot-project/dicot-api/pkg/auth"
 	"github.com/dicot-project/dicot-api/pkg/rest"
 )
 
 type service struct {
-	RESTClient *k8srest.RESTClient
-	Clientset  *k8s.Clientset
-	Prefix     string
-	Services   *rest.ServiceList
+	RESTClient   *k8srest.RESTClient
+	Clientset    *k8s.Clientset
+	Prefix       string
+	Services     *rest.ServiceList
+	TokenManager auth.TokenManager
 }
 
-func NewService(cl *k8srest.RESTClient, cls *k8s.Clientset, svcs *rest.ServiceList, prefix string) rest.Service {
+func NewService(cl *k8srest.RESTClient, cls *k8s.Clientset, tm auth.TokenManager, svcs *rest.ServiceList, prefix string) rest.Service {
 	if prefix == "" {
 		prefix = "/identity/v3"
 	}
 	return &service{
-		RESTClient: cl,
-		Clientset:  cls,
-		Prefix:     prefix,
-		Services:   svcs,
+		RESTClient:   cl,
+		Clientset:    cls,
+		Prefix:       prefix,
+		Services:     svcs,
+		TokenManager: tm,
 	}
 }
 
