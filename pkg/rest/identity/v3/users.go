@@ -75,7 +75,7 @@ type UserShowRes struct {
 func (svc *service) UserList(c *gin.Context) {
 	name := c.Query("name")
 
-	clnt := identity.NewUserClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
+	clnt := identity.NewUserClient(svc.IdentityClient, identity.FormatDomainNamespace("default"))
 
 	users, err := clnt.List()
 	if err != nil {
@@ -118,7 +118,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 		return
 	}
 
-	domClnt := identity.NewProjectClient(svc.RESTClient, v1.NamespaceSystem)
+	domClnt := identity.NewProjectClient(svc.IdentityClient, v1.NamespaceSystem)
 
 	var domNamespace string
 	if req.User.DomainID != "" {
@@ -142,7 +142,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 		domNamespace = dom.Spec.Namespace
 	}
 
-	clnt := identity.NewUserClient(svc.RESTClient, domNamespace)
+	clnt := identity.NewUserClient(svc.IdentityClient, domNamespace)
 
 	exists, err := clnt.Exists(req.User.Name)
 	if err != nil {
@@ -221,7 +221,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 func (svc *service) UserShow(c *gin.Context) {
 	userID := c.Param("userID")
 
-	clnt := identity.NewUserClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
+	clnt := identity.NewUserClient(svc.IdentityClient, identity.FormatDomainNamespace("default"))
 
 	user, err := clnt.GetByUID(userID)
 	if err != nil {
@@ -262,7 +262,7 @@ func (svc *service) UserUpdate(c *gin.Context) {
 
 	userID := c.Param("userID")
 
-	clnt := identity.NewUserClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
+	clnt := identity.NewUserClient(svc.IdentityClient, identity.FormatDomainNamespace("default"))
 
 	user, err := clnt.GetByUID(userID)
 	if err != nil {
@@ -360,7 +360,7 @@ func (svc *service) UserUpdate(c *gin.Context) {
 func (svc *service) UserDelete(c *gin.Context) {
 	userID := c.Param("userID")
 
-	clnt := identity.NewUserClient(svc.RESTClient, identity.FormatDomainNamespace("default"))
+	clnt := identity.NewUserClient(svc.IdentityClient, identity.FormatDomainNamespace("default"))
 
 	user, err := clnt.GetByUID(userID)
 	if err != nil {
