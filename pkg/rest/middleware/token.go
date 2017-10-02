@@ -24,37 +24,92 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
+	k8srest "k8s.io/client-go/rest"
 
+	"github.com/dicot-project/dicot-api/pkg/api/identity"
+	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 	"github.com/dicot-project/dicot-api/pkg/auth"
 )
 
-type TokenHandler struct {
+type tokenHandler struct {
 	TokenManager auth.TokenManager
+	RESTClient   *k8srest.RESTClient
+	AllowAnon    bool
 }
 
-func SetToken(c *gin.Context, tok *auth.Token) {
+func newTokenHandler(tokenManager auth.TokenManager, restClient *k8srest.RESTClient, allowAnon bool) Middleware {
+	return &tokenHandler{
+		TokenManager: tokenManager,
+		RESTClient:   restClient,
+		AllowAnon:    allowAnon,
+	}
+}
+
+func NewTokenHandler(tokenManager auth.TokenManager, restClient *k8srest.RESTClient) Middleware {
+	return newTokenHandler(tokenManager, restClient, false)
+}
+
+func NewTokenHandlerAllowAnon(tokenManager auth.TokenManager, restClient *k8srest.RESTClient) Middleware {
+	return newTokenHandler(tokenManager, restClient, true)
+}
+
+func (h *tokenHandler) setToken(c *gin.Context, tok *auth.Token) error {
 	glog.V(1).Infof("Set token %s", tok)
-	c.Set("Token", tok)
+
+	userNS := identity.FormatDomainNamespace(tok.Subject.DomainName)
+	userClnt := identity.NewUserClient(h.RESTClient, userNS)
+	glog.V(1).Infof("Lookup '%s/%s'", userNS, tok.Subject.UserName)
+	user, err := userClnt.Get(tok.Subject.UserName)
+	if err != nil {
+		glog.V(1).Info("Fail %s", err)
+		return err
+	}
+
+	projectNS := identity.FormatDomainNamespace(tok.Scope.DomainName)
+	projectClnt := identity.NewProjectClient(h.RESTClient, projectNS)
+	glog.V(1).Infof("Lookup scope '%s/%s'", projectNS, tok.Scope.ProjectName)
+	project, err := projectClnt.Get(tok.Scope.ProjectName)
+	if err != nil {
+		return err
+	}
+
+	glog.V(1).Infof("Set subject %s scope %s", user, project)
+	c.Set("TokenSubject", user)
+	c.Set("TokenScope", project)
+
+	return nil
 }
 
-func GetToken(c *gin.Context) *auth.Token {
-	obj, ok := c.Get("Token")
+func GetTokenSubject(c *gin.Context) *v1.User {
+	obj, ok := c.Get("TokenSubject")
 	if ok {
 		return nil
 	}
-	ver, ok := obj.(*auth.Token)
+	user, ok := obj.(*v1.User)
 	if !ok {
 		return nil
 	}
-	return ver
+	return user
 }
 
-func (h *TokenHandler) middleware(allowAnon bool) gin.HandlerFunc {
+func GetTokenScope(c *gin.Context) *v1.Project {
+	obj, ok := c.Get("TokenScope")
+	if ok {
+		return nil
+	}
+	project, ok := obj.(*v1.Project)
+	if !ok {
+		return nil
+	}
+	return project
+}
+
+func (h *tokenHandler) Handler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		toksig := c.GetHeader("X-Auth-Token")
 
 		if toksig == "" {
-			if !allowAnon {
+			if !h.AllowAnon {
 				c.AbortWithStatus(http.StatusUnauthorized)
 			}
 			return
@@ -67,14 +122,10 @@ func (h *TokenHandler) middleware(allowAnon bool) gin.HandlerFunc {
 			return
 		}
 
-		SetToken(c, token)
+		err = h.setToken(c, token)
+		if err != nil {
+			c.AbortWithError(http.StatusUnauthorized, err)
+			return
+		}
 	}
-}
-
-func (h *TokenHandler) MiddlewareNoAnon() gin.HandlerFunc {
-	return h.middleware(false)
-}
-
-func (h *TokenHandler) MiddlewareAllowAnon() gin.HandlerFunc {
-	return h.middleware(true)
 }

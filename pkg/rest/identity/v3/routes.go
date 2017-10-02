@@ -67,12 +67,8 @@ func (svc *service) GetUID() string {
 }
 
 func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
-	tok := &middleware.TokenHandler{
-		TokenManager: svc.TokenManager,
-	}
-
-	tokNoAnon := tok.MiddlewareNoAnon()
-	tokAllowAnon := tok.MiddlewareAllowAnon()
+	tokNoAnon := middleware.NewTokenHandler(svc.TokenManager, svc.IdentityClient).Handler()
+	tokAllowAnon := middleware.NewTokenHandlerAllowAnon(svc.TokenManager, svc.IdentityClient).Handler()
 
 	router.GET("/", svc.IndexGet)
 	router.POST("/auth/tokens", tokAllowAnon, svc.TokensPost)

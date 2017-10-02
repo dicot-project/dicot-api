@@ -152,7 +152,7 @@ func main() {
 
 	services := &rest.ServiceList{}
 	services.AddService(identityv3.NewService(identityclient, k8sClient, tm, services, ""))
-	services.AddService(computev2_1.NewService(computeclient, k8sClient, tm, serverID, ""))
+	services.AddService(computev2_1.NewService(identityclient, computeclient, k8sClient, tm, serverID, ""))
 	services.RegisterRoutes(router)
 
 	srv := &http.Server{

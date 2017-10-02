@@ -30,23 +30,25 @@ import (
 )
 
 type service struct {
-	ComputeClient *k8srest.RESTClient
-	K8SClient     *k8s.Clientset
-	Prefix        string
-	ServerID      string
-	TokenManager  auth.TokenManager
+	IdentityClient *k8srest.RESTClient
+	ComputeClient  *k8srest.RESTClient
+	K8SClient      *k8s.Clientset
+	Prefix         string
+	ServerID       string
+	TokenManager   auth.TokenManager
 }
 
-func NewService(computeClient *k8srest.RESTClient, k8sClient *k8s.Clientset, tm auth.TokenManager, serverID string, prefix string) rest.Service {
+func NewService(identityClient *k8srest.RESTClient, computeClient *k8srest.RESTClient, k8sClient *k8s.Clientset, tm auth.TokenManager, serverID string, prefix string) rest.Service {
 	if prefix == "" {
 		prefix = "/compute/v2.1"
 	}
 	return &service{
-		ComputeClient: computeClient,
-		K8SClient:     k8sClient,
-		Prefix:        prefix,
-		ServerID:      serverID,
-		TokenManager:  tm,
+		IdentityClient: identityClient,
+		ComputeClient:  computeClient,
+		K8SClient:      k8sClient,
+		Prefix:         prefix,
+		ServerID:       serverID,
+		TokenManager:   tm,
 	}
 }
 
@@ -67,24 +69,17 @@ func (svc *service) GetUID() string {
 }
 
 func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
-	mv := &middleware.MicroVersionHandler{
-		Service:       "compute",
-		ServiceHeader: "X-OpenStack-Nova-API-Version",
-		Min: &middleware.MicroVersion{
-			Major: 2,
-			Micro: 53,
-		},
-		Max: &middleware.MicroVersion{
-			Major: 2,
-			Micro: 53,
-		},
+	min := &middleware.MicroVersion{
+		Major: 2,
+		Micro: 53,
 	}
-	router.Use(mv.Middleware())
+	max := &middleware.MicroVersion{
+		Major: 2,
+		Micro: 53,
+	}
+	router.Use(middleware.NewMicroVersionHandler("compute", "X-OpenStack-Nova-API-Version", min, max).Handler())
 
-	tok := &middleware.TokenHandler{
-		TokenManager: svc.TokenManager,
-	}
-	router.Use(tok.MiddlewareNoAnon())
+	router.Use(middleware.NewTokenHandler(svc.TokenManager, svc.IdentityClient).Handler())
 
 	//router.GET("/", svc.IndexShow)
 	router.GET("/", svc.VersionIndexShow)

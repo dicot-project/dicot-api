@@ -89,14 +89,23 @@ func (ver *MicroVersion) InRange(min, max *MicroVersion) bool {
 	return false
 }
 
-type MicroVersionHandler struct {
+type microVersionHandler struct {
 	Service       string
 	ServiceHeader string
 	Min           *MicroVersion
 	Max           *MicroVersion
 }
 
-func SetMicroVersion(c *gin.Context, ver *MicroVersion) {
+func NewMicroVersionHandler(service, serviceheader string, min, max *MicroVersion) Middleware {
+	return &microVersionHandler{
+		Service:       service,
+		ServiceHeader: serviceheader,
+		Min:           min,
+		Max:           max,
+	}
+}
+
+func setMicroVersion(c *gin.Context, ver *MicroVersion) {
 	glog.V(1).Infof("Set micro version %s", ver.String())
 	c.Set("MicroVersion", ver)
 }
@@ -113,7 +122,7 @@ func GetMicroVersion(c *gin.Context) *MicroVersion {
 	return ver
 }
 
-func (h *MicroVersionHandler) Middleware() gin.HandlerFunc {
+func (h *microVersionHandler) Handler() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		verHeader := c.GetHeader("Openstack-API-Version")
 
@@ -123,7 +132,7 @@ func (h *MicroVersionHandler) Middleware() gin.HandlerFunc {
 				verString = c.GetHeader(h.ServiceHeader)
 			}
 			if verString == "" {
-				SetMicroVersion(c, h.Min)
+				setMicroVersion(c, h.Min)
 				return
 			}
 		} else {
@@ -135,7 +144,7 @@ func (h *MicroVersionHandler) Middleware() gin.HandlerFunc {
 			}
 
 			if bits[0] != h.Service {
-				SetMicroVersion(c, h.Min)
+				setMicroVersion(c, h.Min)
 				return
 			}
 
@@ -143,7 +152,7 @@ func (h *MicroVersionHandler) Middleware() gin.HandlerFunc {
 		}
 
 		if verString == "latest" {
-			SetMicroVersion(c, h.Max)
+			setMicroVersion(c, h.Max)
 			return
 		}
 
@@ -155,7 +164,7 @@ func (h *MicroVersionHandler) Middleware() gin.HandlerFunc {
 		}
 
 		if got.InRange(h.Min, h.Max) {
-			SetMicroVersion(c, got)
+			setMicroVersion(c, got)
 			return
 		}
 
