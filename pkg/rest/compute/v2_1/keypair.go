@@ -78,7 +78,7 @@ func (svc *service) KeypairList(c *gin.Context) {
 	marker := c.Query("marker")
 	filterLimit, limit := GetFilterUInt(c, "limit")
 
-	clnt := compute.NewKeypairClient(svc.RESTClient, k8sv1.NamespaceDefault)
+	clnt := compute.NewKeypairClient(svc.ComputeClient, k8sv1.NamespaceDefault)
 
 	keypairs, err := clnt.List()
 	if err != nil {
@@ -137,7 +137,7 @@ func (svc *service) KeypairCreate(c *gin.Context) {
 		return
 	}
 
-	clnt := compute.NewKeypairClient(svc.RESTClient, k8sv1.NamespaceDefault)
+	clnt := compute.NewKeypairClient(svc.ComputeClient, k8sv1.NamespaceDefault)
 
 	exists, err := clnt.Exists(req.Keypair.Name)
 	if err != nil {
@@ -210,7 +210,7 @@ func (svc *service) KeypairCreate(c *gin.Context) {
 func (svc *service) KeypairShow(c *gin.Context) {
 	name := c.Param("name")
 
-	clnt := compute.NewKeypairClient(svc.RESTClient, k8sv1.NamespaceDefault)
+	clnt := compute.NewKeypairClient(svc.ComputeClient, k8sv1.NamespaceDefault)
 
 	keypair, err := clnt.Get(name)
 	if err != nil {
@@ -242,7 +242,7 @@ func (svc *service) KeypairShow(c *gin.Context) {
 func (svc *service) KeypairDelete(c *gin.Context) {
 	name := c.Param("name")
 
-	clnt := compute.NewKeypairClient(svc.RESTClient, k8sv1.NamespaceDefault)
+	clnt := compute.NewKeypairClient(svc.ComputeClient, k8sv1.NamespaceDefault)
 
 	keypair, err := clnt.Get(name)
 	if err != nil {
