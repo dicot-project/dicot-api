@@ -24,11 +24,11 @@ conf/identity_admin: conf/identity_admin.in conf/admin-password.txt
 	PW=`cat conf/admin-password.txt` && \
 		sed -e "s,::ADMIN-PASSWORD::,$${PW}," < $< > $@ || rm $@
 
-manifests/project-default.yaml: manifests/project-default.yaml.in conf/admin-password.txt  bin/dicot-pwhash
+manifests/050-identity-project.yaml: manifests/050-identity-project.yaml.in conf/admin-password.txt  bin/dicot-pwhash
 	PW=`bin/dicot-pwhash --password-file=conf/admin-password.txt` && \
 		sed -e "s,::ADMIN-PASSWORD::,$${PW}," < $< > $@ || rm $@
 
-conf: manifests/project-default.yaml conf/identity_admin
+conf: manifests/050-identity-project.yaml conf/identity_admin
 
 .vendor.status: glide.yaml glide.lock
 	glide install --strip-vendor && touch .vendor.status

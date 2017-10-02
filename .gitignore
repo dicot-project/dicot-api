@@ -6,4 +6,4 @@ bin/
 .#*
 conf/admin-password.txt
 conf/identity_admin
-manifests/project-default.yaml
+manifests/050-identity-project.yaml
