@@ -137,15 +137,15 @@ func (svc *service) TokensPost(c *gin.Context) {
 	}
 
 	domClnt := identity.NewProjectClient(svc.IdentityClient, v1.NamespaceSystem)
-	var domain *v1.Project
+	var userDomain *v1.Project
 	if req.Auth.Identity.Password.User.Domain.Name != "" {
-		domain, err = domClnt.Get(req.Auth.Identity.Password.User.Domain.Name)
+		userDomain, err = domClnt.Get(req.Auth.Identity.Password.User.Domain.Name)
 		if err != nil {
 			c.AbortWithError(http.StatusUnauthorized, err)
 			return
 		}
 	} else if req.Auth.Identity.Password.User.Domain.ID != "" {
-		domain, err = domClnt.GetByUID(req.Auth.Identity.Password.User.Domain.ID)
+		userDomain, err = domClnt.GetByUID(req.Auth.Identity.Password.User.Domain.ID)
 		if err != nil {
 			c.AbortWithError(http.StatusUnauthorized, err)
 			return
@@ -154,9 +154,9 @@ func (svc *service) TokensPost(c *gin.Context) {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
-	namespace := identity.FormatDomainNamespace(domain.ObjectMeta.Name)
+	userNamespace := identity.FormatDomainNamespace(userDomain.ObjectMeta.Name)
 
-	userClnt := identity.NewUserClient(svc.IdentityClient, namespace)
+	userClnt := identity.NewUserClient(svc.IdentityClient, userNamespace)
 
 	var user *v1.User
 	if req.Auth.Identity.Password.User.Name != "" {
@@ -169,7 +169,7 @@ func (svc *service) TokensPost(c *gin.Context) {
 		return
 	}
 
-	secret, err := svc.K8SClient.CoreV1().Secrets(namespace).Get(user.Spec.Password.SecretRef, metav1.GetOptions{})
+	secret, err := svc.K8SClient.CoreV1().Secrets(userNamespace).Get(user.Spec.Password.SecretRef, metav1.GetOptions{})
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
 		return
@@ -187,14 +187,48 @@ func (svc *service) TokensPost(c *gin.Context) {
 		return
 	}
 
+	var projectDomain *v1.Project
+	if req.Auth.Scope.Project.Domain.Name != "" {
+		projectDomain, err = domClnt.Get(req.Auth.Scope.Project.Domain.Name)
+		if err != nil {
+			c.AbortWithError(http.StatusUnauthorized, err)
+			return
+		}
+	} else if req.Auth.Scope.Project.Domain.ID != "" {
+		projectDomain, err = domClnt.GetByUID(req.Auth.Scope.Project.Domain.ID)
+		if err != nil {
+			c.AbortWithError(http.StatusUnauthorized, err)
+			return
+		}
+	} else {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+	projectNamespace := identity.FormatDomainNamespace(projectDomain.ObjectMeta.Name)
+
+	projectClnt := identity.NewProjectClient(svc.IdentityClient, projectNamespace)
+
+	var project *v1.Project
+	if req.Auth.Scope.Project.Name != "" {
+		project, err = projectClnt.Get(req.Auth.Scope.Project.Name)
+	} else {
+		project, err = projectClnt.GetByUID(req.Auth.Scope.Project.ID)
+	}
+	if err != nil {
+		c.AbortWithError(http.StatusUnauthorized, err)
+		return
+	}
+
+	// XXX validate user's access to the requested project
+
 	token := svc.TokenManager.NewToken()
 	token.Subject = auth.TokenSubject{
-		DomainName: domain.ObjectMeta.Name,
+		DomainName: userDomain.ObjectMeta.Name,
 		UserName:   user.ObjectMeta.Name,
 	}
 	token.Scope = auth.TokenScope{
-		DomainName:  "",
-		ProjectName: "",
+		DomainName:  projectDomain.ObjectMeta.Name,
+		ProjectName: project.ObjectMeta.Name,
 	}
 
 	tokensig, err := svc.TokenManager.SignToken(token)
@@ -247,16 +281,16 @@ func (svc *service) TokensPost(c *gin.Context) {
 			},
 			Project: ProjectInfoRef{
 				Domain: DomainInfoRef{
-					ID:   "f4ae7bf2-94a7-11e7-b158-e4b318e0afce",
-					Name: "default",
+					ID:   string(projectDomain.ObjectMeta.UID),
+					Name: projectDomain.ObjectMeta.Name,
 				},
-				ID:   "324cd174-94a9-11e7-a705-e4b318e0afce",
-				Name: "demo",
+				ID:   string(project.ObjectMeta.UID),
+				Name: project.ObjectMeta.Name,
 			},
 			User: UserInfoRef{
 				Domain: DomainInfoRef{
-					ID:   string(domain.ObjectMeta.UID),
-					Name: domain.ObjectMeta.Name,
+					ID:   string(userDomain.ObjectMeta.UID),
+					Name: userDomain.ObjectMeta.Name,
 				},
 				ID:                string(user.ObjectMeta.UID),
 				Name:              user.Spec.Name,
