@@ -26,6 +26,7 @@ import (
 
 	"github.com/dicot-project/dicot-api/pkg/auth"
 	"github.com/dicot-project/dicot-api/pkg/rest"
+	"github.com/dicot-project/dicot-api/pkg/rest/middleware"
 )
 
 type service struct {
@@ -66,34 +67,41 @@ func (svc *service) GetUID() string {
 }
 
 func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
+	tok := &middleware.TokenHandler{
+		TokenManager: svc.TokenManager,
+	}
+
+	tokNoAnon := tok.MiddlewareNoAnon()
+	tokAllowAnon := tok.MiddlewareAllowAnon()
+
 	router.GET("/", svc.IndexGet)
-	router.POST("/auth/tokens", svc.TokensPost)
+	router.POST("/auth/tokens", tokAllowAnon, svc.TokensPost)
 
-	router.GET("/domains", svc.DomainList)
-	router.POST("/domains", svc.DomainCreate)
-	router.GET("/domains/:domainID", svc.DomainShow)
-	router.PATCH("/domains/:domainID", svc.DomainUpdate)
-	router.DELETE("/domains/:domainID", svc.DomainDelete)
+	router.GET("/domains", tokNoAnon, svc.DomainList)
+	router.POST("/domains", tokNoAnon, svc.DomainCreate)
+	router.GET("/domains/:domainID", tokNoAnon, svc.DomainShow)
+	router.PATCH("/domains/:domainID", tokNoAnon, svc.DomainUpdate)
+	router.DELETE("/domains/:domainID", tokNoAnon, svc.DomainDelete)
 
-	router.GET("/projects", svc.ProjectList)
-	router.POST("/projects", svc.ProjectCreate)
-	router.GET("/projects/:projectID", svc.ProjectShow)
-	router.PATCH("/projects/:projectID", svc.ProjectUpdate)
-	router.DELETE("/projects/:projectID", svc.ProjectDelete)
+	router.GET("/projects", tokNoAnon, svc.ProjectList)
+	router.POST("/projects", tokNoAnon, svc.ProjectCreate)
+	router.GET("/projects/:projectID", tokNoAnon, svc.ProjectShow)
+	router.PATCH("/projects/:projectID", tokNoAnon, svc.ProjectUpdate)
+	router.DELETE("/projects/:projectID", tokNoAnon, svc.ProjectDelete)
 
-	router.GET("/users", svc.UserList)
-	router.POST("/users", svc.UserCreate)
-	router.GET("/users/:userID", svc.UserShow)
-	router.PATCH("/users/:userID", svc.UserUpdate)
-	router.DELETE("/users/:userID", svc.UserDelete)
+	router.GET("/users", tokNoAnon, svc.UserList)
+	router.POST("/users", tokNoAnon, svc.UserCreate)
+	router.GET("/users/:userID", tokNoAnon, svc.UserShow)
+	router.PATCH("/users/:userID", tokNoAnon, svc.UserUpdate)
+	router.DELETE("/users/:userID", tokNoAnon, svc.UserDelete)
 
-	router.GET("/groups", svc.GroupList)
-	router.POST("/groups", svc.GroupCreate)
-	router.GET("/groups/:groupID", svc.GroupShow)
-	router.PATCH("/groups/:groupID", svc.GroupUpdate)
-	router.DELETE("/groups/:groupID", svc.GroupDelete)
-	router.GET("/groups/:groupID/users", svc.GroupUserList)
-	router.PUT("/groups/:groupID/users/:userID", svc.GroupUserAdd)
-	router.HEAD("/groups/:groupID/users/:userID", svc.GroupUserCheck)
-	router.DELETE("/groups/:groupID/users/:userID", svc.GroupUserDelete)
+	router.GET("/groups", tokNoAnon, svc.GroupList)
+	router.POST("/groups", tokNoAnon, svc.GroupCreate)
+	router.GET("/groups/:groupID", tokNoAnon, svc.GroupShow)
+	router.PATCH("/groups/:groupID", tokNoAnon, svc.GroupUpdate)
+	router.DELETE("/groups/:groupID", tokNoAnon, svc.GroupDelete)
+	router.GET("/groups/:groupID/users", tokNoAnon, svc.GroupUserList)
+	router.PUT("/groups/:groupID/users/:userID", tokNoAnon, svc.GroupUserAdd)
+	router.HEAD("/groups/:groupID/users/:userID", tokNoAnon, svc.GroupUserCheck)
+	router.DELETE("/groups/:groupID/users/:userID", tokNoAnon, svc.GroupUserDelete)
 }

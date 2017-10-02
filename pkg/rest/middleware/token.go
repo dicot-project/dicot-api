@@ -49,9 +49,16 @@ func GetToken(c *gin.Context) *auth.Token {
 	return ver
 }
 
-func (h *TokenHandler) Middleware() gin.HandlerFunc {
+func (h *TokenHandler) middleware(allowAnon bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		toksig := c.GetHeader("X-Auth-Token")
+
+		if toksig == "" {
+			if !allowAnon {
+				c.AbortWithStatus(http.StatusUnauthorized)
+			}
+			return
+		}
 
 		token, err := h.TokenManager.ValidateToken(toksig)
 
@@ -62,4 +69,12 @@ func (h *TokenHandler) Middleware() gin.HandlerFunc {
 
 		SetToken(c, token)
 	}
+}
+
+func (h *TokenHandler) MiddlewareNoAnon() gin.HandlerFunc {
+	return h.middleware(false)
+}
+
+func (h *TokenHandler) MiddlewareAllowAnon() gin.HandlerFunc {
+	return h.middleware(true)
 }

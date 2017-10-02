@@ -84,7 +84,7 @@ func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
 	tok := &middleware.TokenHandler{
 		TokenManager: svc.TokenManager,
 	}
-	router.Use(tok.Middleware())
+	router.Use(tok.MiddlewareNoAnon())
 
 	//router.GET("/", svc.IndexShow)
 	router.GET("/", svc.VersionIndexShow)
