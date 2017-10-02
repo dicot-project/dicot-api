@@ -257,7 +257,7 @@ func (svc *service) ProjectCreate(c *gin.Context) {
 		return
 	}
 
-	projectNS, err = svc.Clientset.Namespaces().Create(projectNS)
+	projectNS, err = svc.K8SClient.Namespaces().Create(projectNS)
 	if err != nil {
 		clnt.Delete(project.ObjectMeta.Name, nil)
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -385,7 +385,7 @@ func (svc *service) ProjectDelete(c *gin.Context) {
 		return
 	}
 
-	_ = svc.Clientset.Namespaces().Delete(project.Spec.Namespace, nil)
+	_ = svc.K8SClient.Namespaces().Delete(project.Spec.Namespace, nil)
 
 	c.String(http.StatusNoContent, "")
 }

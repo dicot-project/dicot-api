@@ -192,7 +192,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 		return
 	}
 
-	pwSecret, err = svc.Clientset.CoreV1().Secrets(domNamespace).Create(pwSecret)
+	pwSecret, err = svc.K8SClient.CoreV1().Secrets(domNamespace).Create(pwSecret)
 	if err != nil {
 		clnt.Delete(user.ObjectMeta.Name, nil)
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -307,7 +307,7 @@ func (svc *service) UserUpdate(c *gin.Context) {
 			return
 		}
 
-		secret, err := svc.Clientset.CoreV1().Secrets(user.ObjectMeta.Namespace).Get(
+		secret, err := svc.K8SClient.CoreV1().Secrets(user.ObjectMeta.Namespace).Get(
 			user.Spec.Password.SecretRef, metav1.GetOptions{})
 		if err != nil && !errors.IsNotFound(err) {
 			c.AbortWithError(http.StatusInternalServerError, err)
@@ -322,10 +322,10 @@ func (svc *service) UserUpdate(c *gin.Context) {
 					"password": []byte(pwHash),
 				},
 			}
-			secret, err = svc.Clientset.CoreV1().Secrets(user.ObjectMeta.Namespace).Create(secret)
+			secret, err = svc.K8SClient.CoreV1().Secrets(user.ObjectMeta.Namespace).Create(secret)
 		} else {
 			secret.Data["password"] = []byte(pwHash)
-			secret, err = svc.Clientset.CoreV1().Secrets(user.ObjectMeta.Namespace).Update(secret)
+			secret, err = svc.K8SClient.CoreV1().Secrets(user.ObjectMeta.Namespace).Update(secret)
 		}
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
@@ -372,7 +372,7 @@ func (svc *service) UserDelete(c *gin.Context) {
 		return
 	}
 
-	err = svc.Clientset.CoreV1().Secrets(user.ObjectMeta.Namespace).Delete(
+	err = svc.K8SClient.CoreV1().Secrets(user.ObjectMeta.Namespace).Delete(
 		user.Spec.Password.SecretRef, nil)
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)

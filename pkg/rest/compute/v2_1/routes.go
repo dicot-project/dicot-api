@@ -31,19 +31,19 @@ import (
 
 type service struct {
 	RESTClient   *k8srest.RESTClient
-	Clientset    *k8s.Clientset
+	K8SClient    *k8s.Clientset
 	Prefix       string
 	ServerID     string
 	TokenManager auth.TokenManager
 }
 
-func NewService(cl *k8srest.RESTClient, cls *k8s.Clientset, tm auth.TokenManager, serverID string, prefix string) rest.Service {
+func NewService(cl *k8srest.RESTClient, k8sClient *k8s.Clientset, tm auth.TokenManager, serverID string, prefix string) rest.Service {
 	if prefix == "" {
 		prefix = "/compute/v2.1"
 	}
 	return &service{
 		RESTClient:   cl,
-		Clientset:    cls,
+		K8SClient:    k8sClient,
 		Prefix:       prefix,
 		ServerID:     serverID,
 		TokenManager: tm,

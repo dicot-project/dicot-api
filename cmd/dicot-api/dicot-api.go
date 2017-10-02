@@ -138,7 +138,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Kube client: %s\n", err)
 	}
-	clientset, err := GetKubernetesClient(kubeconfig)
+	k8sClient, err := GetKubernetesClient(kubeconfig)
 	if err != nil {
 		log.Fatal("Kube client: %s\n", err)
 	}
@@ -151,8 +151,8 @@ func main() {
 	serverID := "e1552b45-f0cb-4d2b-bfb9-ae0877696e39"
 
 	services := &rest.ServiceList{}
-	services.AddService(identityv3.NewService(identityclient, clientset, tm, services, ""))
-	services.AddService(computev2_1.NewService(computeclient, clientset, tm, serverID, ""))
+	services.AddService(identityv3.NewService(identityclient, k8sClient, tm, services, ""))
+	services.AddService(computev2_1.NewService(computeclient, k8sClient, tm, serverID, ""))
 	services.RegisterRoutes(router)
 
 	srv := &http.Server{

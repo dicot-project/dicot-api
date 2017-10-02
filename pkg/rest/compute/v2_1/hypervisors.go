@@ -104,7 +104,7 @@ func (svc *service) getHypervisorList(c *gin.Context) ([]k8sv1.Pod, error) {
 		return []k8sv1.Pod{}, err
 	}
 
-	pods, err := svc.Clientset.CoreV1().Pods(k8smetav1.NamespaceAll).List(
+	pods, err := svc.K8SClient.CoreV1().Pods(k8smetav1.NamespaceAll).List(
 		k8smetav1.ListOptions{
 			LabelSelector: selector.String()})
 	if err != nil {
@@ -213,7 +213,7 @@ func (svc *service) HypervisorShow(c *gin.Context) {
 		return
 	}
 
-	pods, err := svc.Clientset.CoreV1().Pods(k8smetav1.NamespaceAll).List(
+	pods, err := svc.K8SClient.CoreV1().Pods(k8smetav1.NamespaceAll).List(
 		k8smetav1.ListOptions{
 			LabelSelector: labelSelector.String(),
 			FieldSelector: fieldSelector.String(),

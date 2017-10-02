@@ -169,7 +169,7 @@ func (svc *service) TokensPost(c *gin.Context) {
 		return
 	}
 
-	secret, err := svc.Clientset.CoreV1().Secrets(namespace).Get(user.Spec.Password.SecretRef, metav1.GetOptions{})
+	secret, err := svc.K8SClient.CoreV1().Secrets(namespace).Get(user.Spec.Password.SecretRef, metav1.GetOptions{})
 	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
 		return
