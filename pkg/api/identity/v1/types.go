@@ -166,6 +166,7 @@ type GroupList struct {
 
 type GroupSpec struct {
 	Name        string   `json:"name"`
+	DomainID    string   `json:"domain_id"`
 	Description string   `json:"description"`
 	UserIDs     []string `json:"user_ids"`
 }

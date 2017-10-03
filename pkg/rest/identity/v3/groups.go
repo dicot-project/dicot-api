@@ -99,6 +99,7 @@ func (svc *service) GroupList(c *gin.Context) {
 		info := GroupInfo{
 			ID:          string(group.ObjectMeta.UID),
 			Name:        group.Spec.Name,
+			DomainID:    group.Spec.DomainID,
 			Description: group.Spec.Description,
 		}
 		res.Groups = append(res.Groups, info)
@@ -153,6 +154,7 @@ func (svc *service) GroupCreate(c *gin.Context) {
 		},
 		Spec: v1.GroupSpec{
 			Name:        req.Group.Name,
+			DomainID:    req.Group.DomainID,
 			Description: req.Group.Description,
 		},
 	}
@@ -168,6 +170,7 @@ func (svc *service) GroupCreate(c *gin.Context) {
 		Group: GroupInfo{
 			ID:          string(group.ObjectMeta.UID),
 			Name:        group.Spec.Name,
+			DomainID:    group.Spec.DomainID,
 			Description: group.Spec.Description,
 		},
 	}
@@ -197,6 +200,7 @@ func (svc *service) GroupShow(c *gin.Context) {
 		Group: GroupInfo{
 			ID:          string(group.ObjectMeta.UID),
 			Name:        group.Spec.Name,
+			DomainID:    group.Spec.DomainID,
 			Description: group.Spec.Description,
 		},
 	}
