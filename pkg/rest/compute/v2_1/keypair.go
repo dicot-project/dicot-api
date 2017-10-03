@@ -25,12 +25,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8sv1 "k8s.io/client-go/pkg/api/v1"
 
 	"github.com/dicot-project/dicot-api/pkg/api/compute"
 	"github.com/dicot-project/dicot-api/pkg/api/compute/v1"
 	"github.com/dicot-project/dicot-api/pkg/crypto"
 	"github.com/dicot-project/dicot-api/pkg/rest"
+	"github.com/dicot-project/dicot-api/pkg/rest/middleware"
 )
 
 type KeypairListRes struct {
@@ -74,11 +74,12 @@ type KeypairInfo struct {
 }
 
 func (svc *service) KeypairList(c *gin.Context) {
+	proj := middleware.RequiredTokenScopeProject(c)
 	// XXX user id
 	marker := c.Query("marker")
 	filterLimit, limit := GetFilterUInt(c, "limit")
 
-	clnt := compute.NewKeypairClient(svc.ComputeClient, k8sv1.NamespaceDefault)
+	clnt := compute.NewKeypairClient(svc.ComputeClient, proj.Spec.Namespace)
 
 	keypairs, err := clnt.List()
 	if err != nil {
@@ -125,6 +126,7 @@ func (svc *service) KeypairList(c *gin.Context) {
 }
 
 func (svc *service) KeypairCreate(c *gin.Context) {
+	proj := middleware.RequiredTokenScopeProject(c)
 	req := KeypairCreateReq{
 		Keypair: KeypairInfo{
 			Type:   "ssh",
@@ -137,7 +139,7 @@ func (svc *service) KeypairCreate(c *gin.Context) {
 		return
 	}
 
-	clnt := compute.NewKeypairClient(svc.ComputeClient, k8sv1.NamespaceDefault)
+	clnt := compute.NewKeypairClient(svc.ComputeClient, proj.Spec.Namespace)
 
 	exists, err := clnt.Exists(req.Keypair.Name)
 	if err != nil {
@@ -208,9 +210,10 @@ func (svc *service) KeypairCreate(c *gin.Context) {
 }
 
 func (svc *service) KeypairShow(c *gin.Context) {
+	proj := middleware.RequiredTokenScopeProject(c)
 	name := c.Param("name")
 
-	clnt := compute.NewKeypairClient(svc.ComputeClient, k8sv1.NamespaceDefault)
+	clnt := compute.NewKeypairClient(svc.ComputeClient, proj.Spec.Namespace)
 
 	keypair, err := clnt.Get(name)
 	if err != nil {
@@ -240,9 +243,10 @@ func (svc *service) KeypairShow(c *gin.Context) {
 }
 
 func (svc *service) KeypairDelete(c *gin.Context) {
+	proj := middleware.RequiredTokenScopeProject(c)
 	name := c.Param("name")
 
-	clnt := compute.NewKeypairClient(svc.ComputeClient, k8sv1.NamespaceDefault)
+	clnt := compute.NewKeypairClient(svc.ComputeClient, proj.Spec.Namespace)
 
 	keypair, err := clnt.Get(name)
 	if err != nil {
