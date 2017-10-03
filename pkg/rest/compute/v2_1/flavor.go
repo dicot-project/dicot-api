@@ -30,6 +30,7 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/compute"
 	"github.com/dicot-project/dicot-api/pkg/api/compute/v1"
 	"github.com/dicot-project/dicot-api/pkg/rest"
+	"github.com/dicot-project/dicot-api/pkg/rest/middleware"
 )
 
 type FlavorCreateReq struct {
@@ -75,6 +76,7 @@ type FlavorInfoDetail struct {
 }
 
 func (svc *service) commonFlavorList(c *gin.Context) ([]v1.Flavor, bool) {
+	dom := middleware.RequiredTokenScopeDomain(c)
 	//sortKeys := c.QueryArray("sort_key")
 	//sortDirs := c.QueryArray("sort_dir")
 	marker := c.Query("marker")
@@ -86,7 +88,7 @@ func (svc *service) commonFlavorList(c *gin.Context) ([]v1.Flavor, bool) {
 	// XXX Disallow unless user == admin
 	filterPublic, public := GetFilterBool(c, "isPublic")
 
-	clnt := compute.NewFlavorClient(svc.ComputeClient, v1.NamespaceSystem)
+	clnt := compute.NewFlavorClient(svc.ComputeClient, dom.Spec.Namespace)
 
 	flavors, err := clnt.List()
 	if err != nil {
@@ -183,6 +185,7 @@ func (svc *service) FlavorListDetail(c *gin.Context) {
 }
 
 func (svc *service) FlavorShow(c *gin.Context) {
+	dom := middleware.RequiredTokenScopeDomain(c)
 	id := c.Param("id")
 
 	if id == "detail" {
@@ -190,7 +193,7 @@ func (svc *service) FlavorShow(c *gin.Context) {
 		return
 	}
 
-	clnt := compute.NewFlavorClient(svc.ComputeClient, v1.NamespaceSystem)
+	clnt := compute.NewFlavorClient(svc.ComputeClient, dom.Spec.Namespace)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
@@ -223,9 +226,10 @@ func (svc *service) FlavorShow(c *gin.Context) {
 }
 
 func (svc *service) FlavorDelete(c *gin.Context) {
+	dom := middleware.RequiredTokenScopeDomain(c)
 	id := c.Param("id")
 
-	clnt := compute.NewFlavorClient(svc.ComputeClient, v1.NamespaceSystem)
+	clnt := compute.NewFlavorClient(svc.ComputeClient, dom.Spec.Namespace)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
@@ -247,6 +251,7 @@ func (svc *service) FlavorDelete(c *gin.Context) {
 }
 
 func (svc *service) FlavorCreate(c *gin.Context) {
+	dom := middleware.RequiredTokenScopeDomain(c)
 	req := FlavorCreateReq{
 		Flavor: FlavorInfoDetail{
 			FlavorInfo: FlavorInfo{
@@ -268,7 +273,7 @@ func (svc *service) FlavorCreate(c *gin.Context) {
 		return
 	}
 
-	clnt := compute.NewFlavorClient(svc.ComputeClient, v1.NamespaceSystem)
+	clnt := compute.NewFlavorClient(svc.ComputeClient, dom.Spec.Namespace)
 
 	flavor, err := clnt.GetByID(req.Flavor.ID)
 	if err != nil {
@@ -326,9 +331,10 @@ func (svc *service) FlavorCreate(c *gin.Context) {
 }
 
 func (svc *service) FlavorShowExtraSpecs(c *gin.Context) {
+	dom := middleware.RequiredTokenScopeDomain(c)
 	id := c.Param("id")
 
-	clnt := compute.NewFlavorClient(svc.ComputeClient, v1.NamespaceSystem)
+	clnt := compute.NewFlavorClient(svc.ComputeClient, dom.Spec.Namespace)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
@@ -347,6 +353,7 @@ func (svc *service) FlavorShowExtraSpecs(c *gin.Context) {
 }
 
 func (svc *service) FlavorCreateExtraSpecs(c *gin.Context) {
+	dom := middleware.RequiredTokenScopeDomain(c)
 	req := FlavorExtraSpecsCreateReq{}
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -356,7 +363,7 @@ func (svc *service) FlavorCreateExtraSpecs(c *gin.Context) {
 
 	id := c.Param("id")
 
-	clnt := compute.NewFlavorClient(svc.ComputeClient, v1.NamespaceSystem)
+	clnt := compute.NewFlavorClient(svc.ComputeClient, dom.Spec.Namespace)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
@@ -386,10 +393,11 @@ func (svc *service) FlavorCreateExtraSpecs(c *gin.Context) {
 }
 
 func (svc *service) FlavorShowExtraSpec(c *gin.Context) {
+	dom := middleware.RequiredTokenScopeDomain(c)
 	id := c.Param("id")
 	key := c.Param("key")
 
-	clnt := compute.NewFlavorClient(svc.ComputeClient, v1.NamespaceSystem)
+	clnt := compute.NewFlavorClient(svc.ComputeClient, dom.Spec.Namespace)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
@@ -415,6 +423,7 @@ func (svc *service) FlavorShowExtraSpec(c *gin.Context) {
 }
 
 func (svc *service) FlavorCreateExtraSpec(c *gin.Context) {
+	dom := middleware.RequiredTokenScopeDomain(c)
 	req := map[string]string{}
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -425,7 +434,7 @@ func (svc *service) FlavorCreateExtraSpec(c *gin.Context) {
 	id := c.Param("id")
 	key := c.Param("key")
 
-	clnt := compute.NewFlavorClient(svc.ComputeClient, v1.NamespaceSystem)
+	clnt := compute.NewFlavorClient(svc.ComputeClient, dom.Spec.Namespace)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {
@@ -459,10 +468,11 @@ func (svc *service) FlavorCreateExtraSpec(c *gin.Context) {
 }
 
 func (svc *service) FlavorDeleteExtraSpec(c *gin.Context) {
+	dom := middleware.RequiredTokenScopeDomain(c)
 	id := c.Param("id")
 	key := c.Param("key")
 
-	clnt := compute.NewFlavorClient(svc.ComputeClient, v1.NamespaceSystem)
+	clnt := compute.NewFlavorClient(svc.ComputeClient, dom.Spec.Namespace)
 
 	flavor, err := clnt.GetByID(id)
 	if err != nil {

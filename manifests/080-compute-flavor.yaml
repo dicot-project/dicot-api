@@ -2,7 +2,7 @@ apiVersion: compute.dicot.io/v1alpha1
 kind: Flavor
 metadata:
   name: m1.tiny
-  namespace: dicot-system
+  namespace: dicot-domain-default
 spec:
   id: "1"
   disabled: false
@@ -19,7 +19,7 @@ apiVersion: compute.dicot.io/v1alpha1
 kind: Flavor
 metadata:
   name: m1.small
-  namespace: dicot-system
+  namespace: dicot-domain-default
 spec:
   id: "2"
   disabled: false
@@ -36,7 +36,7 @@ apiVersion: compute.dicot.io/v1alpha1
 kind: Flavor
 metadata:
   name: m1.medium
-  namespace: dicot-system
+  namespace: dicot-domain-default
 spec:
   id: "3"
   disabled: false
@@ -53,7 +53,7 @@ apiVersion: compute.dicot.io/v1alpha1
 kind: Flavor
 metadata:
   name: m1.large
-  namespace: dicot-system
+  namespace: dicot-domain-default
 spec:
   id: "4"
   disabled: false
@@ -70,7 +70,7 @@ apiVersion: compute.dicot.io/v1alpha1
 kind: Flavor
 metadata:
   name: m1.xlarge
-  namespace: dicot-system
+  namespace: dicot-domain-default
 spec:
   id: "5"
   disabled: false
