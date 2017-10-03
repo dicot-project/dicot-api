@@ -31,6 +31,7 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 	"github.com/dicot-project/dicot-api/pkg/crypto"
 	"github.com/dicot-project/dicot-api/pkg/rest"
+	"github.com/dicot-project/dicot-api/pkg/rest/middleware"
 )
 
 type UserListRes struct {
@@ -75,7 +76,7 @@ type UserShowRes struct {
 func (svc *service) UserList(c *gin.Context) {
 	name := c.Query("name")
 
-	clnt := identity.NewUserClient(svc.IdentityClient, identity.FormatDomainNamespace("default"))
+	clnt := identity.NewUserClient(svc.IdentityClient, k8sv1.NamespaceAll)
 
 	users, err := clnt.List()
 	if err != nil {
@@ -111,6 +112,7 @@ func (svc *service) UserList(c *gin.Context) {
 }
 
 func (svc *service) UserCreate(c *gin.Context) {
+	dom := middleware.GetTokenScopeDomain(c)
 	var req UserCreateReq
 	err := c.BindJSON(&req)
 	if err != nil {
@@ -133,11 +135,6 @@ func (svc *service) UserCreate(c *gin.Context) {
 		}
 		domNamespace = dom.Spec.Namespace
 	} else {
-		dom, err := domClnt.Get("default")
-		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
 		req.User.DomainID = string(dom.ObjectMeta.UID)
 		domNamespace = dom.Spec.Namespace
 	}
@@ -221,7 +218,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 func (svc *service) UserShow(c *gin.Context) {
 	userID := c.Param("userID")
 
-	clnt := identity.NewUserClient(svc.IdentityClient, identity.FormatDomainNamespace("default"))
+	clnt := identity.NewUserClient(svc.IdentityClient, k8sv1.NamespaceAll)
 
 	user, err := clnt.GetByUID(userID)
 	if err != nil {
@@ -262,7 +259,7 @@ func (svc *service) UserUpdate(c *gin.Context) {
 
 	userID := c.Param("userID")
 
-	clnt := identity.NewUserClient(svc.IdentityClient, identity.FormatDomainNamespace("default"))
+	clnt := identity.NewUserClient(svc.IdentityClient, k8sv1.NamespaceAll)
 
 	user, err := clnt.GetByUID(userID)
 	if err != nil {
@@ -273,6 +270,8 @@ func (svc *service) UserUpdate(c *gin.Context) {
 		}
 		return
 	}
+
+	clnt = identity.NewUserClient(svc.IdentityClient, user.ObjectMeta.Namespace)
 
 	if req.User.Name != nil {
 		c.AbortWithStatus(http.StatusForbidden)
@@ -360,7 +359,7 @@ func (svc *service) UserUpdate(c *gin.Context) {
 func (svc *service) UserDelete(c *gin.Context) {
 	userID := c.Param("userID")
 
-	clnt := identity.NewUserClient(svc.IdentityClient, identity.FormatDomainNamespace("default"))
+	clnt := identity.NewUserClient(svc.IdentityClient, k8sv1.NamespaceAll)
 
 	user, err := clnt.GetByUID(userID)
 	if err != nil {
@@ -371,6 +370,8 @@ func (svc *service) UserDelete(c *gin.Context) {
 		}
 		return
 	}
+
+	clnt = identity.NewUserClient(svc.IdentityClient, user.ObjectMeta.Namespace)
 
 	err = svc.K8SClient.CoreV1().Secrets(user.ObjectMeta.Namespace).Delete(
 		user.Spec.Password.SecretRef, nil)
