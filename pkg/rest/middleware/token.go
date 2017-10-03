@@ -54,35 +54,41 @@ func NewTokenHandlerAllowAnon(tokenManager auth.TokenManager, restClient *k8sres
 }
 
 func (h *tokenHandler) setToken(c *gin.Context, tok *auth.Token) error {
-	glog.V(1).Infof("Set token %s", tok)
-
 	userNS := identity.FormatDomainNamespace(tok.Subject.DomainName)
 	userClnt := identity.NewUserClient(h.RESTClient, userNS)
-	glog.V(1).Infof("Lookup '%s/%s'", userNS, tok.Subject.UserName)
+	glog.V(1).Infof("Lookup subject user '%s/%s'", userNS, tok.Subject.UserName)
 	user, err := userClnt.Get(tok.Subject.UserName)
 	if err != nil {
 		glog.V(1).Info("Fail %s", err)
 		return err
 	}
 
+	domainClnt := identity.NewProjectClient(h.RESTClient, v1.NamespaceSystem)
+	glog.V(1).Infof("Lookup scope domain '%s/%s'", v1.NamespaceSystem, tok.Scope.DomainName)
+	domain, err := domainClnt.Get(tok.Scope.DomainName)
+	if err != nil {
+		return err
+	}
+
 	projectNS := identity.FormatDomainNamespace(tok.Scope.DomainName)
 	projectClnt := identity.NewProjectClient(h.RESTClient, projectNS)
-	glog.V(1).Infof("Lookup scope '%s/%s'", projectNS, tok.Scope.ProjectName)
+	glog.V(1).Infof("Lookup scope project '%s/%s'", projectNS, tok.Scope.ProjectName)
 	project, err := projectClnt.Get(tok.Scope.ProjectName)
 	if err != nil {
 		return err
 	}
 
-	glog.V(1).Infof("Set subject %s scope %s", user, project)
-	c.Set("TokenSubject", user)
-	c.Set("TokenScope", project)
+	glog.V(1).Infof("Set user %s domain %s project %s", user, domain, project)
+	c.Set("TokenSubjectUser", user)
+	c.Set("TokenScopeDomain", domain)
+	c.Set("TokenScopeProject", project)
 
 	return nil
 }
 
-func GetTokenSubject(c *gin.Context) *v1.User {
-	obj, ok := c.Get("TokenSubject")
-	if ok {
+func GetTokenSubjectUser(c *gin.Context) *v1.User {
+	obj, ok := c.Get("TokenSubjectUser")
+	if !ok {
 		return nil
 	}
 	user, ok := obj.(*v1.User)
@@ -92,9 +98,37 @@ func GetTokenSubject(c *gin.Context) *v1.User {
 	return user
 }
 
-func GetTokenScope(c *gin.Context) *v1.Project {
-	obj, ok := c.Get("TokenScope")
-	if ok {
+func RequiredTokenSubjectUser(c *gin.Context) *v1.User {
+	user := GetTokenSubjectUser(c)
+	if user == nil {
+		panic("User is unexpectedly nil")
+	}
+	return user
+}
+
+func GetTokenScopeDomain(c *gin.Context) *v1.Project {
+	obj, ok := c.Get("TokenScopeDomain")
+	if !ok {
+		return nil
+	}
+	domain, ok := obj.(*v1.Project)
+	if !ok {
+		return nil
+	}
+	return domain
+}
+
+func RequiredTokenScopeDomain(c *gin.Context) *v1.Project {
+	proj := GetTokenScopeDomain(c)
+	if proj == nil {
+		panic("Domain is unexpectedly nil")
+	}
+	return proj
+}
+
+func GetTokenScopeProject(c *gin.Context) *v1.Project {
+	obj, ok := c.Get("TokenScopeProject")
+	if !ok {
 		return nil
 	}
 	project, ok := obj.(*v1.Project)
@@ -102,6 +136,14 @@ func GetTokenScope(c *gin.Context) *v1.Project {
 		return nil
 	}
 	return project
+}
+
+func RequiredTokenScopeProject(c *gin.Context) *v1.Project {
+	proj := GetTokenScopeProject(c)
+	if proj == nil {
+		panic("Project is unexpectedly nil")
+	}
+	return proj
 }
 
 func (h *tokenHandler) Handler() gin.HandlerFunc {
