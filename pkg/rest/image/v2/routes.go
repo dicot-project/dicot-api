@@ -75,6 +75,8 @@ func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/v2/images", svc.ImageCreate)
 	router.GET("/v2/images/:imageID", svc.ImageShow)
 	router.DELETE("/v2/images/:imageID", svc.ImageDelete)
+	router.POST("/v2/images/:imageID/actions/deactivate", svc.ImageDeactivate)
+	router.POST("/v2/images/:imageID/actions/reactivate", svc.ImageReactivate)
 
 	router.GET("/v2/schemas/image", svc.SchemaImageShow)
 }

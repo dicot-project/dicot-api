@@ -337,3 +337,81 @@ func (svc *service) ImageDelete(c *gin.Context) {
 
 	c.String(http.StatusNoContent, "")
 }
+
+func (svc *service) ImageDeactivate(c *gin.Context) {
+	proj := middleware.RequiredTokenScopeProject(c)
+	imgID := c.Param("imageID")
+
+	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+
+	img, err := clnt.GetByID(imgID)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	clnt = image.NewImageClient(svc.ImageClient, img.ObjectMeta.Namespace)
+
+	if img.Spec.Status == image.IMAGE_STATUS_DEACTIVATED {
+		c.String(http.StatusNoContent, "")
+		return
+	}
+
+	if img.Spec.Status != image.IMAGE_STATUS_ACTIVE {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	img.Spec.Status = image.IMAGE_STATUS_DEACTIVATED
+
+	img, err = clnt.Update(img)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.String(http.StatusNoContent, "")
+}
+
+func (svc *service) ImageReactivate(c *gin.Context) {
+	proj := middleware.RequiredTokenScopeProject(c)
+	imgID := c.Param("imageID")
+
+	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+
+	img, err := clnt.GetByID(imgID)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	clnt = image.NewImageClient(svc.ImageClient, img.ObjectMeta.Namespace)
+
+	if img.Spec.Status == image.IMAGE_STATUS_ACTIVE {
+		c.String(http.StatusNoContent, "")
+		return
+	}
+
+	if img.Spec.Status != image.IMAGE_STATUS_DEACTIVATED {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	img.Spec.Status = image.IMAGE_STATUS_ACTIVE
+
+	img, err = clnt.Update(img)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.String(http.StatusNoContent, "")
+}
