@@ -43,7 +43,11 @@ func (pc *GroupClient) Create(obj *v1.Group) (*v1.Group, error) {
 	err := pc.cl.Post().
 		Namespace(pc.ns).Resource("groups").
 		Body(obj).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *GroupClient) Update(obj *v1.Group) (*v1.Group, error) {
@@ -52,7 +56,11 @@ func (pc *GroupClient) Update(obj *v1.Group) (*v1.Group, error) {
 	err := pc.cl.Put().
 		Namespace(pc.ns).Resource("groups").
 		Name(name).Body(obj).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *GroupClient) Delete(name string, options *meta_v1.DeleteOptions) error {
@@ -67,7 +75,11 @@ func (pc *GroupClient) Get(name string) (*v1.Group, error) {
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("groups").
 		Name(name).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *GroupClient) GetByUID(uid string) (*v1.Group, error) {
@@ -99,7 +111,11 @@ func (pc *GroupClient) List() (*v1.GroupList, error) {
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("groups").
 		Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *GroupClient) NewListWatch() *cache.ListWatch {

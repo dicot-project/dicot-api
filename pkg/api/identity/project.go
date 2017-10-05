@@ -53,7 +53,11 @@ func (pc *ProjectClient) Create(obj *v1.Project) (*v1.Project, error) {
 	err := pc.cl.Post().
 		Namespace(pc.ns).Resource("projects").
 		Body(obj).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *ProjectClient) Update(obj *v1.Project) (*v1.Project, error) {
@@ -62,7 +66,11 @@ func (pc *ProjectClient) Update(obj *v1.Project) (*v1.Project, error) {
 	err := pc.cl.Put().
 		Namespace(pc.ns).Resource("projects").
 		Name(name).Body(obj).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *ProjectClient) Delete(name string, options *meta_v1.DeleteOptions) error {
@@ -77,7 +85,11 @@ func (pc *ProjectClient) Get(name string) (*v1.Project, error) {
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("projects").
 		Name(name).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *ProjectClient) GetByUID(uid string) (*v1.Project, error) {
@@ -109,7 +121,11 @@ func (pc *ProjectClient) List() (*v1.ProjectList, error) {
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("projects").
 		Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *ProjectClient) NewListWatch() *cache.ListWatch {

@@ -43,7 +43,11 @@ func (pc *RevokedTokenClient) Create(obj *v1.RevokedToken) (*v1.RevokedToken, er
 	err := pc.cl.Post().
 		Namespace(pc.ns).Resource("revokedtokens").
 		Body(obj).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *RevokedTokenClient) Update(obj *v1.RevokedToken) (*v1.RevokedToken, error) {
@@ -52,7 +56,11 @@ func (pc *RevokedTokenClient) Update(obj *v1.RevokedToken) (*v1.RevokedToken, er
 	err := pc.cl.Put().
 		Namespace(pc.ns).Resource("revokedtokens").
 		Name(name).Body(obj).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *RevokedTokenClient) Delete(name string, options *meta_v1.DeleteOptions) error {
@@ -67,7 +75,11 @@ func (pc *RevokedTokenClient) Get(name string) (*v1.RevokedToken, error) {
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("revokedtokens").
 		Name(name).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *RevokedTokenClient) GetByUID(uid string) (*v1.RevokedToken, error) {
@@ -99,7 +111,11 @@ func (pc *RevokedTokenClient) List() (*v1.RevokedTokenList, error) {
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("revokedtokens").
 		Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *RevokedTokenClient) NewListWatch() *cache.ListWatch {

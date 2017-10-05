@@ -43,7 +43,11 @@ func (pc *UserClient) Create(obj *v1.User) (*v1.User, error) {
 	err := pc.cl.Post().
 		Namespace(pc.ns).Resource("users").
 		Body(obj).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *UserClient) Update(obj *v1.User) (*v1.User, error) {
@@ -52,7 +56,11 @@ func (pc *UserClient) Update(obj *v1.User) (*v1.User, error) {
 	err := pc.cl.Put().
 		Namespace(pc.ns).Resource("users").
 		Name(name).Body(obj).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *UserClient) Delete(name string, options *meta_v1.DeleteOptions) error {
@@ -67,7 +75,11 @@ func (pc *UserClient) Get(name string) (*v1.User, error) {
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("users").
 		Name(name).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *UserClient) GetByUID(uid string) (*v1.User, error) {
@@ -99,7 +111,11 @@ func (pc *UserClient) List() (*v1.UserList, error) {
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("users").
 		Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (pc *UserClient) NewListWatch() *cache.ListWatch {

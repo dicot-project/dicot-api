@@ -43,7 +43,11 @@ func (f *FlavorClient) Create(obj *v1.Flavor) (*v1.Flavor, error) {
 	err := f.cl.Post().
 		Namespace(f.ns).Resource("flavors").
 		Body(obj).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (f *FlavorClient) Update(obj *v1.Flavor) (*v1.Flavor, error) {
@@ -52,7 +56,11 @@ func (f *FlavorClient) Update(obj *v1.Flavor) (*v1.Flavor, error) {
 	err := f.cl.Put().
 		Namespace(f.ns).Resource("flavors").
 		Name(name).Body(obj).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (f *FlavorClient) Delete(name string, options *meta_v1.DeleteOptions) error {
@@ -67,7 +75,10 @@ func (f *FlavorClient) Get(name string) (*v1.Flavor, error) {
 	err := f.cl.Get().
 		Namespace(f.ns).Resource("flavors").
 		Name(name).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
 func (f *FlavorClient) GetByID(id string) (*v1.Flavor, error) {
@@ -89,7 +100,11 @@ func (f *FlavorClient) List() (*v1.FlavorList, error) {
 	err := f.cl.Get().
 		Namespace(f.ns).Resource("flavors").
 		Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (f *FlavorClient) NewListWatch() *cache.ListWatch {

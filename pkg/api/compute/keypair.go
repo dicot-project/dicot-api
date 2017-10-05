@@ -43,7 +43,11 @@ func (kpc *KeypairClient) Create(obj *v1.Keypair) (*v1.Keypair, error) {
 	err := kpc.cl.Post().
 		Namespace(kpc.ns).Resource("keypairs").
 		Body(obj).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (kpc *KeypairClient) Update(obj *v1.Keypair) (*v1.Keypair, error) {
@@ -52,7 +56,11 @@ func (kpc *KeypairClient) Update(obj *v1.Keypair) (*v1.Keypair, error) {
 	err := kpc.cl.Put().
 		Namespace(kpc.ns).Resource("keypairs").
 		Name(name).Body(obj).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (kpc *KeypairClient) Delete(name string, options *meta_v1.DeleteOptions) error {
@@ -67,7 +75,10 @@ func (kpc *KeypairClient) Get(name string) (*v1.Keypair, error) {
 	err := kpc.cl.Get().
 		Namespace(kpc.ns).Resource("keypairs").
 		Name(name).Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
 }
 
 func (kpc *KeypairClient) Exists(name string) (bool, error) {
@@ -86,7 +97,11 @@ func (kpc *KeypairClient) List() (*v1.KeypairList, error) {
 	err := kpc.cl.Get().
 		Namespace(kpc.ns).Resource("keypairs").
 		Do().Into(&result)
-	return &result, err
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+
 }
 
 func (kpc *KeypairClient) NewListWatch() *cache.ListWatch {
