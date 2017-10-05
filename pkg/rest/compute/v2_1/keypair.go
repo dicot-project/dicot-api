@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/dicot-project/dicot-api/pkg/api/compute"
@@ -217,12 +218,11 @@ func (svc *service) KeypairShow(c *gin.Context) {
 
 	keypair, err := clnt.Get(name)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	if keypair == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
@@ -250,12 +250,11 @@ func (svc *service) KeypairDelete(c *gin.Context) {
 
 	keypair, err := clnt.Get(name)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	if keypair == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 

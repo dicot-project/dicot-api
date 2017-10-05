@@ -276,12 +276,13 @@ func (svc *service) FlavorCreate(c *gin.Context) {
 	clnt := compute.NewFlavorClient(svc.ComputeClient, dom.Spec.Namespace)
 
 	flavor, err := clnt.GetByID(req.Flavor.ID)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			c.AbortWithError(http.StatusNotFound, err)
-		} else {
-			c.AbortWithError(http.StatusInternalServerError, err)
-		}
+	if err != nil && !errors.IsNotFound(err) {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	if flavor != nil {
+		c.AbortWithError(http.StatusConflict, err)
 		return
 	}
 
