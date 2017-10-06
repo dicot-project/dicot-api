@@ -411,3 +411,81 @@ func (svc *service) ImageReactivate(c *gin.Context) {
 
 	c.String(http.StatusNoContent, "")
 }
+
+func (svc *service) ImageTagAdd(c *gin.Context) {
+	proj := middleware.RequiredTokenScopeProject(c)
+	imgID := c.Param("imageID")
+	tag := c.Param("tag")
+
+	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+
+	img, err := clnt.GetByID(imgID)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	found := false
+	for _, item := range img.Spec.Tags {
+		if item == tag {
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		img.Spec.Tags = append(img.Spec.Tags, tag)
+		img, err = clnt.Update(img)
+
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	c.String(http.StatusNoContent, "")
+}
+
+func (svc *service) ImageTagDelete(c *gin.Context) {
+	proj := middleware.RequiredTokenScopeProject(c)
+	imgID := c.Param("imageID")
+	tag := c.Param("tag")
+
+	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+
+	img, err := clnt.GetByID(imgID)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	tags := []string{}
+	found := false
+	for _, item := range img.Spec.Tags {
+		if item == tag {
+			found = true
+		} else {
+			tags = append(tags, item)
+		}
+	}
+
+	if found {
+		img.Spec.Tags = tags
+		img, err = clnt.Update(img)
+
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	c.String(http.StatusNoContent, "")
+}
