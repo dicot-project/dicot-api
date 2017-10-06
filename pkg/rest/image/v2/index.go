@@ -28,11 +28,7 @@ import (
 )
 
 type IndexRes struct {
-	Versions []VersionInfo `json:"version"`
-}
-
-type VersionIndexRes struct {
-	Version VersionInfo `json:"version"`
+	Versions []VersionInfo `json:"versions"`
 }
 
 type VersionInfo struct {
