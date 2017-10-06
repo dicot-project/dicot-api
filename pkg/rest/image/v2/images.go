@@ -354,8 +354,6 @@ func (svc *service) ImageDeactivate(c *gin.Context) {
 		return
 	}
 
-	clnt = image.NewImageClient(svc.ImageClient, img.ObjectMeta.Namespace)
-
 	if img.Spec.Status == image.IMAGE_STATUS_DEACTIVATED {
 		c.String(http.StatusNoContent, "")
 		return
@@ -392,8 +390,6 @@ func (svc *service) ImageReactivate(c *gin.Context) {
 		}
 		return
 	}
-
-	clnt = image.NewImageClient(svc.ImageClient, img.ObjectMeta.Namespace)
 
 	if img.Spec.Status == image.IMAGE_STATUS_ACTIVE {
 		c.String(http.StatusNoContent, "")
