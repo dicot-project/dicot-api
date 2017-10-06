@@ -117,7 +117,7 @@ func (svc *service) ImageList(c *gin.Context) {
 		info := ImageInfo{
 			ID:              img.Spec.ID,
 			Name:            img.Spec.Name,
-			File:            "/",
+			File:            fmt.Sprintf("/v2/images/%s/file", img.Spec.ID),
 			Schema:          "/v2/schemas/image",
 			Owner:           img.Spec.Owner,
 			Status:          img.Spec.Status,
@@ -247,7 +247,7 @@ func (svc *service) ImageCreate(c *gin.Context) {
 	res := ImageInfo{
 		ID:              img.Spec.ID,
 		Name:            img.Spec.Name,
-		File:            "/",
+		File:            fmt.Sprintf("/v2/images/%s/file", img.Spec.ID),
 		Schema:          "/v2/schemas/image",
 		Status:          img.Spec.Status,
 		Owner:           img.Spec.Owner,
@@ -290,7 +290,7 @@ func (svc *service) ImageShow(c *gin.Context) {
 		ID:              img.Spec.ID,
 		Name:            img.Spec.Name,
 		Status:          img.Spec.Status,
-		File:            "/",
+		File:            fmt.Sprintf("/v2/images/%s/file", img.Spec.ID),
 		Schema:          "/v2/schemas/image",
 		Owner:           img.Spec.Owner,
 		ContainerFormat: img.Spec.ContainerFormat,
