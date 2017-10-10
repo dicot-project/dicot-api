@@ -40,6 +40,7 @@ import (
 	identityv1 "github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 	"github.com/dicot-project/dicot-api/pkg/api/image"
 	"github.com/dicot-project/dicot-api/pkg/api/image/v1"
+	"github.com/dicot-project/dicot-api/pkg/rest"
 	"github.com/dicot-project/dicot-api/pkg/rest/middleware"
 )
 
@@ -143,6 +144,14 @@ func (info *ImageCreateReq) UnmarshalJSON(b []byte) error {
 
 	return nil
 }
+
+type ImagePatchChange struct {
+	Op    string      `json:"op"`
+	Path  string      `json:"path"`
+	Value interface{} `json:"value"`
+}
+
+type ImagePatchReq []ImagePatchChange
 
 func ImageAccessible(img *v1.Image, proj *identityv1.Project) bool {
 	if img.ObjectMeta.Namespace == proj.Spec.Namespace {
@@ -416,6 +425,133 @@ func (svc *service) ImageDelete(c *gin.Context) {
 	}
 
 	c.String(http.StatusNoContent, "")
+}
+
+func (svc *service) ImagePatch(c *gin.Context) {
+	proj := middleware.RequiredTokenScopeProject(c)
+	imgID := c.Param("imageID")
+	var req ImagePatchReq
+	err := c.BindJSON(&req)
+	if err != nil {
+		glog.V(1).Info("Failed to parse request")
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+
+	img, err := clnt.GetByID(imgID)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	fields := []rest.PatchFieldInfo{
+		rest.PatchFieldInfo{
+			Name: []string{"id"},
+		},
+		rest.PatchFieldInfo{
+			Name: []string{"name"},
+		},
+		rest.PatchFieldInfo{
+			Name: []string{"status"},
+		},
+		rest.PatchFieldInfo{
+			Name:      []string{"container_format"},
+			StringPtr: &img.Spec.ContainerFormat,
+		},
+		rest.PatchFieldInfo{
+			Name:      []string{"disk_format"},
+			StringPtr: &img.Spec.DiskFormat,
+		},
+		rest.PatchFieldInfo{
+			Name:   []string{"visibility"},
+			String: &img.Spec.Visibility,
+		},
+		rest.PatchFieldInfo{
+			Name:    []string{"protected"},
+			Boolean: &img.Spec.Protected,
+		},
+		rest.PatchFieldInfo{
+			Name: []string{"size"},
+		},
+		rest.PatchFieldInfo{
+			Name: []string{"virtual_size"},
+		},
+		rest.PatchFieldInfo{
+			Name: []string{"owner"},
+		},
+		rest.PatchFieldInfo{
+			Name:   []string{"min_disk"},
+			UInt64: &img.Spec.MinDisk,
+		},
+		rest.PatchFieldInfo{
+			Name:   []string{"min_ram"},
+			UInt64: &img.Spec.MinRam,
+		},
+		rest.PatchFieldInfo{
+			Name: []string{"checksum"},
+		},
+		rest.PatchFieldInfo{
+			Name: []string{"created_at"},
+		},
+		rest.PatchFieldInfo{
+			Name: []string{"updated_at"},
+		},
+		rest.PatchFieldInfo{
+			Name:       []string{"tags"},
+			StringList: &img.Spec.Tags,
+		},
+	}
+
+	changes := []rest.PatchChange{}
+	for _, el := range req {
+		changes = append(changes, rest.PatchChange{
+			el.Op, el.Path, el.Value,
+		})
+	}
+
+	glog.V(1).Infof("Changes %s", req)
+	changed, err := rest.ApplyPatch(changes, fields, &img.Spec.Metadata)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	if changed {
+		img, err = clnt.Update(img)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+	}
+
+	res := ImageInfo{
+		ID:              img.Spec.ID,
+		Name:            img.Spec.Name,
+		Status:          img.Spec.Status,
+		File:            fmt.Sprintf("/v2/images/%s/file", img.Spec.ID),
+		Schema:          "/v2/schemas/image",
+		Owner:           img.Spec.Owner,
+		ContainerFormat: img.Spec.ContainerFormat,
+		DiskFormat:      img.Spec.DiskFormat,
+		MinDisk:         img.Spec.MinDisk,
+		MinRam:          img.Spec.MinRam,
+		Protected:       img.Spec.Protected,
+		Visibility:      img.Spec.Visibility,
+		Tags:            img.Spec.Tags,
+		CreatedAt:       img.Spec.CreatedAt,
+		UpdatedAt:       img.Spec.UpdatedAt,
+		Size:            img.Spec.Size,
+		VirtualSize:     img.Spec.VirtualSize,
+		Checksum:        nil,
+	}
+
+	c.JSON(http.StatusOK, res)
 }
 
 func (svc *service) ImageDeactivate(c *gin.Context) {

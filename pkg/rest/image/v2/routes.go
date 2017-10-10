@@ -77,6 +77,7 @@ func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/v2/images", svc.ImageCreate)
 	router.GET("/v2/images/:imageID", svc.ImageShow)
 	router.DELETE("/v2/images/:imageID", svc.ImageDelete)
+	router.PATCH("/v2/images/:imageID", rest.RequiresFormat("application/openstack-images-v2.1-json-patch"), svc.ImagePatch)
 	router.POST("/v2/images/:imageID/actions/deactivate", svc.ImageDeactivate)
 	router.POST("/v2/images/:imageID/actions/reactivate", svc.ImageReactivate)
 	router.PUT("/v2/images/:imageID/tags/:tag", svc.ImageTagAdd)
