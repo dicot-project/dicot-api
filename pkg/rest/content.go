@@ -21,6 +21,7 @@ package rest
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -40,6 +41,19 @@ func AcceptJSON() gin.HandlerFunc {
 
 		if ctype == "" {
 			c.AbortWithError(http.StatusNotAcceptable, errors.New("the accepted formats are not offered by the server"))
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func RequiresFormat(ctype string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		offered := c.ContentType()
+
+		if offered != ctype {
+			c.AbortWithError(http.StatusNotAcceptable, fmt.Errorf("the provided content format must be '%s' not '%s'", ctype, offered))
 			return
 		}
 
