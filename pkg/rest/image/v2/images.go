@@ -22,7 +22,10 @@ package v2
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"time"
@@ -39,6 +42,8 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/image/v1"
 	"github.com/dicot-project/dicot-api/pkg/rest/middleware"
 )
+
+const TEN_GB = 10 * 1024 * 1024 * 1024
 
 type ImageCreateReq struct {
 	ID              string            `json:"id"`
@@ -563,4 +568,91 @@ func (svc *service) ImageTagDelete(c *gin.Context) {
 	}
 
 	c.String(http.StatusNoContent, "")
+}
+
+func (svc *service) ImageDataUpload(c *gin.Context) {
+	proj := middleware.RequiredTokenScopeProject(c)
+	imgID := c.Param("imageID")
+
+	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+
+	img, err := clnt.GetByID(imgID)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	name := filepath.Join(svc.ImageRepo, imgID)
+
+	dst, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE, 0660)
+	if err != nil {
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	src := c.Request.Body
+
+	// XX checksum
+	n, err := io.Copy(dst, &io.LimitedReader{src, TEN_GB})
+	if err != nil {
+		dst.Close()
+		os.Remove(name)
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+	size := uint64(n)
+	img.Spec.Size = &size
+
+	remain := make([]byte, 1)
+	_, err = src.Read(remain)
+	if err == nil || err != io.EOF {
+		dst.Close()
+		os.Remove(name)
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	err = dst.Close()
+	if err != nil {
+		os.Remove(name)
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	img.Spec.Status = image.IMAGE_STATUS_ACTIVE
+
+	img, err = clnt.Update(img)
+	if err != nil {
+		os.Remove(name)
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	c.String(http.StatusNoContent, "")
+}
+
+func (svc *service) ImageDataDownload(c *gin.Context) {
+	proj := middleware.RequiredTokenScopeProject(c)
+	imgID := c.Param("imageID")
+
+	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+
+	_, err := clnt.GetByID(imgID)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	name := filepath.Join(svc.ImageRepo, imgID)
+
+	c.Status(http.StatusOK)
+	c.File(name)
 }

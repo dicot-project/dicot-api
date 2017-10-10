@@ -34,9 +34,10 @@ type service struct {
 	Prefix         string
 	ServerID       string
 	TokenManager   auth.TokenManager
+	ImageRepo      string
 }
 
-func NewService(identityClient *k8srest.RESTClient, imageClient *k8srest.RESTClient, tm auth.TokenManager, serverID string, prefix string) rest.Service {
+func NewService(identityClient *k8srest.RESTClient, imageClient *k8srest.RESTClient, tm auth.TokenManager, imagerepo string, serverID string, prefix string) rest.Service {
 	if prefix == "" {
 		prefix = "/image"
 	}
@@ -46,6 +47,7 @@ func NewService(identityClient *k8srest.RESTClient, imageClient *k8srest.RESTCli
 		Prefix:         prefix,
 		ServerID:       serverID,
 		TokenManager:   tm,
+		ImageRepo:      imagerepo,
 	}
 }
 
@@ -79,6 +81,8 @@ func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
 	router.POST("/v2/images/:imageID/actions/reactivate", svc.ImageReactivate)
 	router.PUT("/v2/images/:imageID/tags/:tag", svc.ImageTagAdd)
 	router.DELETE("/v2/images/:imageID/tags/:tag", svc.ImageTagDelete)
+	router.PUT("/v2/images/:imageID/file", svc.ImageDataUpload)
+	router.GET("/v2/images/:imageID/file", svc.ImageDataDownload)
 
 	router.GET("/v2/schemas/image", svc.SchemaImageShow)
 }

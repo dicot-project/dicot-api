@@ -114,12 +114,14 @@ func main() {
 	var debug bool
 	var logRequests bool
 	var kubeconfig string
+	var imagerepo string
 
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
 
 	pflag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kube config. Only required if out-of-cluster.")
 	pflag.BoolVarP(&debug, "debug", "d", false, "Debug mode")
 	pflag.BoolVarP(&logRequests, "log-requests", "l", false, "Log requests")
+	pflag.StringVar(&imagerepo, "imagerepo", "/srv/images", "Path to image repository storage.")
 
 	pflag.Parse()
 
@@ -163,7 +165,7 @@ func main() {
 	services := &rest.ServiceList{}
 	services.AddService(identityv3.NewService(identityclient, k8sClient, tm, services, ""))
 	services.AddService(computev2_1.NewService(identityclient, computeclient, k8sClient, tm, serverID, ""))
-	services.AddService(imagev2.NewService(identityclient, imageclient, tm, serverID, ""))
+	services.AddService(imagev2.NewService(identityclient, imageclient, tm, imagerepo, serverID, ""))
 	services.RegisterRoutes(router)
 
 	srv := &http.Server{
