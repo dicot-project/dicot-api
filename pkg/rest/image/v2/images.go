@@ -130,6 +130,8 @@ func (svc *service) ImageList(c *gin.Context) {
 			Tags:            img.Spec.Tags,
 			CreatedAt:       img.Spec.CreatedAt,
 			UpdatedAt:       img.Spec.UpdatedAt,
+			Size:            img.Spec.Size,
+			VirtualSize:     img.Spec.VirtualSize,
 			Checksum:        nil,
 		}
 		res.Images = append(res.Images, info)
@@ -260,6 +262,8 @@ func (svc *service) ImageCreate(c *gin.Context) {
 		Tags:            img.Spec.Tags,
 		CreatedAt:       img.Spec.CreatedAt,
 		UpdatedAt:       img.Spec.UpdatedAt,
+		Size:            img.Spec.Size,
+		VirtualSize:     img.Spec.VirtualSize,
 		Checksum:        nil,
 	}
 	c.JSON(http.StatusOK, res)
@@ -302,6 +306,8 @@ func (svc *service) ImageShow(c *gin.Context) {
 		Tags:            img.Spec.Tags,
 		CreatedAt:       img.Spec.CreatedAt,
 		UpdatedAt:       img.Spec.UpdatedAt,
+		Size:            img.Spec.Size,
+		VirtualSize:     img.Spec.VirtualSize,
 		Checksum:        nil,
 	}
 
