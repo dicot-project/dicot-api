@@ -20,8 +20,11 @@
 package v2
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -38,15 +41,16 @@ import (
 )
 
 type ImageCreateReq struct {
-	ID              string   `json:"id"`
-	Name            *string  `json:"name"`
-	ContainerFormat *string  `json:"container_format"`
-	DiskFormat      *string  `json:"disk_format"`
-	Visibility      *string  `json:"visibility"`
-	Protected       *bool    `json:"protected"`
-	MinDisk         uint64   `json:"min_disk"`
-	MinRam          uint64   `json:"min_ram"`
-	Tags            []string `json:"tags"`
+	ID              string            `json:"id"`
+	Name            *string           `json:"name"`
+	ContainerFormat *string           `json:"container_format"`
+	DiskFormat      *string           `json:"disk_format"`
+	Visibility      *string           `json:"visibility"`
+	Protected       *bool             `json:"protected"`
+	MinDisk         uint64            `json:"min_disk"`
+	MinRam          uint64            `json:"min_ram"`
+	Tags            []string          `json:"tags"`
+	Metadata        map[string]string `json:"-"`
 }
 
 type ImageListRes struct {
@@ -54,24 +58,85 @@ type ImageListRes struct {
 }
 
 type ImageInfo struct {
-	ID              string   `json:"id"`
-	Name            *string  `json:"name"`
-	File            string   `json:"file"`
-	Schema          string   `json:"schema"`
-	Status          string   `json:"status"`
-	ContainerFormat *string  `json:"container_format"`
-	DiskFormat      *string  `json:"disk_format"`
-	Visibility      string   `json:"visibility"`
-	Protected       bool     `json:"protected"`
-	Size            *uint64  `json:"size"`
-	VirtualSize     *uint64  `json:"virtual_size"`
-	Owner           string   `json:"owner"`
-	MinDisk         uint64   `json:"min_disk"`
-	MinRam          uint64   `json:"min_ram"`
-	Checksum        *string  `json:"checksum"`
-	CreatedAt       string   `json:"created_at"`
-	UpdatedAt       string   `json:"updated_at"`
-	Tags            []string `json:"tags"`
+	ID              string            `json:"id"`
+	Name            *string           `json:"name"`
+	File            string            `json:"file"`
+	Schema          string            `json:"schema"`
+	Status          string            `json:"status"`
+	ContainerFormat *string           `json:"container_format"`
+	DiskFormat      *string           `json:"disk_format"`
+	Visibility      string            `json:"visibility"`
+	Protected       bool              `json:"protected"`
+	Size            *uint64           `json:"size"`
+	VirtualSize     *uint64           `json:"virtual_size"`
+	Owner           string            `json:"owner"`
+	MinDisk         uint64            `json:"min_disk"`
+	MinRam          uint64            `json:"min_ram"`
+	Checksum        *string           `json:"checksum"`
+	CreatedAt       string            `json:"created_at"`
+	UpdatedAt       string            `json:"updated_at"`
+	Tags            []string          `json:"tags"`
+	Metadata        map[string]string `json:"-"`
+}
+
+func (info ImageInfo) MarshalJSON() ([]byte, error) {
+	data := make(map[string]interface{})
+
+	// Take everything in Extra
+	for k, v := range info.Metadata {
+		data[k] = v
+	}
+
+	// Take all the struct values with a json tag
+	val := reflect.ValueOf(info)
+	typ := reflect.TypeOf(info)
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		fieldv := val.Field(i)
+		jsonTag := strings.Split(field.Tag.Get("json"), ",")[0]
+		if jsonTag != "" && jsonTag != "-" {
+			data[jsonTag] = fieldv.Interface()
+		}
+	}
+	return json.Marshal(data)
+}
+
+type _ImageCreateReq ImageCreateReq
+
+func (info *ImageCreateReq) UnmarshalJSON(b []byte) error {
+	info2 := _ImageCreateReq{}
+	err := json.Unmarshal(b, &info2)
+	if err != nil {
+		return err
+	}
+
+	data := make(map[string]interface{})
+	err = json.Unmarshal(b, &data)
+	if err != nil {
+		return err
+	}
+
+	typ := reflect.TypeOf(info2)
+	for i := 0; i < typ.NumField(); i++ {
+		field := typ.Field(i)
+		jsonTag := strings.Split(field.Tag.Get("json"), ",")[0]
+		if jsonTag != "" && jsonTag != "-" {
+			delete(data, jsonTag)
+		}
+	}
+
+	*info = ImageCreateReq(info2)
+
+	info.Metadata = make(map[string]string)
+	for key, val := range data {
+		str, ok := val.(string)
+		if !ok {
+			return fmt.Errorf("Expecting a string for metadata properties")
+		}
+		info.Metadata[key] = str
+	}
+
+	return nil
 }
 
 func ImageAccessible(img *v1.Image, proj *identityv1.Project) bool {
@@ -133,6 +198,7 @@ func (svc *service) ImageList(c *gin.Context) {
 			Size:            img.Spec.Size,
 			VirtualSize:     img.Spec.VirtualSize,
 			Checksum:        nil,
+			Metadata:        img.Spec.Metadata,
 		}
 		res.Images = append(res.Images, info)
 	}
@@ -236,6 +302,7 @@ func (svc *service) ImageCreate(c *gin.Context) {
 			Tags:            req.Tags,
 			CreatedAt:       time.Now().Format(time.RFC3339),
 			UpdatedAt:       time.Now().Format(time.RFC3339),
+			Metadata:        req.Metadata,
 		},
 	}
 
@@ -265,6 +332,7 @@ func (svc *service) ImageCreate(c *gin.Context) {
 		Size:            img.Spec.Size,
 		VirtualSize:     img.Spec.VirtualSize,
 		Checksum:        nil,
+		Metadata:        img.Spec.Metadata,
 	}
 	c.JSON(http.StatusOK, res)
 }
@@ -309,6 +377,7 @@ func (svc *service) ImageShow(c *gin.Context) {
 		Size:            img.Spec.Size,
 		VirtualSize:     img.Spec.VirtualSize,
 		Checksum:        nil,
+		Metadata:        img.Spec.Metadata,
 	}
 
 	c.JSON(http.StatusOK, res)
