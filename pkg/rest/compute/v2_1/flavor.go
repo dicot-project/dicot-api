@@ -307,7 +307,15 @@ func (svc *service) FlavorCreate(c *gin.Context) {
 
 	flavor, err = clnt.Create(flavor)
 	if err != nil {
-		c.AbortWithError(http.StatusInternalServerError, err)
+		if errors.IsAlreadyExists(err) {
+			// It's a design limitation, while OpenStack
+			// Nova accepts flavors with same names. Our
+			// design uses the flavor name as an uniq
+			// identifier.
+			c.AbortWithError(http.StatusConflict, err)
+		} else {
+			c.AbortWithError(http.StatusInternalServerError, err)
+		}
 		return
 	}
 
