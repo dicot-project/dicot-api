@@ -376,6 +376,11 @@ func (svc *service) FlavorCreateExtraSpecs(c *gin.Context) {
 		return
 	}
 
+	if flavor.Spec.ExtraSpecs == nil {
+		// We want initialize the map in case manifest does
+		// not define any extra-specs property.
+		flavor.Spec.ExtraSpecs = make(map[string]string)
+	}
 	for key, val := range req.ExtraSpecs {
 		flavor.Spec.ExtraSpecs[key] = val
 	}
