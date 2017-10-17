@@ -20,7 +20,7 @@ Starting from a default Fedora 26 Server install the following
 extra software needs installing and configuring
 
 ```bash
-sudo dnf install etcd docker git libvirt-devel
+sudo dnf install etcd docker git libvirt-devel rsync
 sudo dnf install golang glide golang-googlecode-tools-goimports
 sudo groupadd docker
 sudo gpasswd -a $USER docker
