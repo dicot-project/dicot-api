@@ -282,7 +282,7 @@ func (svc *service) FlavorCreate(c *gin.Context) {
 	}
 
 	if flavor != nil {
-		c.AbortWithError(http.StatusConflict, err)
+		c.AbortWithStatus(http.StatusConflict)
 		return
 	}
 
