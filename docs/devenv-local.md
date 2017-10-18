@@ -22,6 +22,7 @@ extra software needs installing and configuring
 ```bash
 sudo dnf install etcd docker git libvirt-devel
 sudo dnf install golang glide golang-googlecode-tools-goimports
+sudo dnf install kubernetes-client
 sudo groupadd docker
 sudo gpasswd -a $USER docker
 sudo systemctl enable docker
