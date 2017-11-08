@@ -21,7 +21,7 @@ extra software needs installing and configuring
 
 ```bash
 sudo dnf install etcd docker git libvirt-devel rsync
-sudo dnf install golang glide golang-googlecode-tools-goimports
+sudo dnf install golang golang-googlecode-tools-goimports
 sudo groupadd docker
 sudo gpasswd -a $USER docker
 sudo systemctl enable docker
@@ -44,6 +44,7 @@ export PATH=\$GOPATH/bin:\$GOPATH/src/k8s.io/kubernetes/_output/bin:\$PATH
 EOF
 . $HOME/.bashrc
 mkdir -p $GOPATH/{src,pkg,bin}
+go get github.com/golang/dep/cmd/dep
 ```
 
 Setting up Kubernetes

@@ -1,7 +1,0 @@
-package: github.com/dicot-project/dicot-api
-import:
-- package: github.com/gin-gonic/gin
-- package: github.com/spf13/pflag
-- package: github.com/golang/glog
-- package: k8s.io/client-go
-  version: ^4.0.0
