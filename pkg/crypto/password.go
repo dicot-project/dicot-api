@@ -24,7 +24,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"golang.org/x/crypto/scrypt"
@@ -38,6 +37,15 @@ const (
 	SCRYPT_SALT_SIZE       = 32
 )
 
+func makeHash(password []byte, salt []byte) ([]byte, error) {
+	return scrypt.Key(
+		password, salt,
+		SCRYPT_COST_FACTOR,
+		SCRYPT_BLOCK_SIZE,
+		SCRYPT_PARALLELIZATION,
+		SCRYPT_OUTPUT_SIZE)
+}
+
 func HashPassword(password string) (string, error) {
 
 	salt := make([]byte, SCRYPT_SALT_SIZE)
@@ -46,12 +54,7 @@ func HashPassword(password string) (string, error) {
 		return "", err
 	}
 
-	pwHash, err := scrypt.Key(
-		[]byte(password), salt,
-		SCRYPT_COST_FACTOR,
-		SCRYPT_BLOCK_SIZE,
-		SCRYPT_PARALLELIZATION,
-		SCRYPT_OUTPUT_SIZE)
+	pwHash, err := makeHash([]byte(password), salt)
 	if err != nil {
 		return "", err
 	}
@@ -59,44 +62,33 @@ func HashPassword(password string) (string, error) {
 	pwHash64 := base64.StdEncoding.EncodeToString(pwHash)
 	salt64 := base64.StdEncoding.EncodeToString(salt)
 
-	return fmt.Sprintf("scrypt,%x,%x,%x,%s,%s",
-		SCRYPT_COST_FACTOR,
-		SCRYPT_BLOCK_SIZE,
-		SCRYPT_PARALLELIZATION,
-		salt64, pwHash64), nil
+	return fmt.Sprintf("scrypt,%s,%s", salt64, pwHash64), nil
 }
 
 func CheckPassword(password string, hash string) (bool, error) {
 	bits := strings.Split(hash, ",")
-	if len(bits) != 6 {
-		return false, fmt.Errorf("Expected 6 bits in hash")
+	if len(bits) != 3 {
+		return false, fmt.Errorf("Expected 3 bits in hash")
 	}
 
 	if bits[0] != "scrypt" {
 		return false, fmt.Errorf("Expected 'scrypt' scheme not '%s'", bits[0])
 	}
 
-	costFactor, err := strconv.ParseInt(bits[1], 16, 0)
-	if err != nil {
-		return false, err
-	}
-	blockSize, err := strconv.ParseInt(bits[2], 16, 0)
-	if err != nil {
-		return false, err
-	}
-	parallelization, err := strconv.ParseInt(bits[3], 16, 0)
+	salt, err := base64.StdEncoding.DecodeString(bits[1])
 	if err != nil {
 		return false, err
 	}
 
-	salt, err := base64.StdEncoding.DecodeString(bits[4])
+	gotHash, err := makeHash([]byte(password), salt)
 	if err != nil {
 		return false, err
 	}
 
-	raw, _ := base64.StdEncoding.DecodeString(bits[5])
-	pwHash, err := scrypt.Key(
-		[]byte(password), salt, int(costFactor), int(blockSize), int(parallelization), len(raw))
+	wantHash, err := base64.StdEncoding.DecodeString(bits[2])
+	if err != nil {
+		return false, err
+	}
 
-	return bytes.Compare(raw, pwHash) == 0, nil
+	return bytes.Compare(gotHash, wantHash) == 0, nil
 }
