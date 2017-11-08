@@ -15,6 +15,9 @@ binaries: .vendor.status
 		ln -s $$GOPATH/bin/$$c ./bin/$$c; \
 	done
 
+check:
+	go test -v ./pkg/...
+
 $(BINARIES): binaries
 
 conf/admin-password.txt:

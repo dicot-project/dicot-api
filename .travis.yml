@@ -13,6 +13,7 @@ install:
 
 script:
  - make
+ - make check
 
 cache:
   directories:
