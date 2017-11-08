@@ -1,0 +1,29 @@
+language: go
+go_import_path: github.com/dicot-project/dicot-api
+sudo: false
+dist: trusty
+
+go:
+- 1.8
+- 1.9
+
+install:
+ - git reset --hard
+ - go get github.com/golang/dep/cmd/dep
+
+script:
+ - make
+
+cache:
+  directories:
+  - vendor
+
+notifications:
+  irc:
+    # The channel name "irc.oftc.net#dicot" is encrypted against dicot-project/dicot-api
+    # to prevent IRC notifications from github forks. This was created using:
+    # $ travis encrypt -r "dicot-project/dicot-api" "irc.oftc.net#dicot"
+    channels:
+      - secure: "pRHJ+serJWqjsbq9d+ng6HYrNoMAAfzOB1u8QqhONKT390SzHO142yYqL/iIn9eTiP9oGpwYMv8vK7DJMi722VdUvC1VRdF5fMXM46A16pG94XRchatbltInL9WqAto8bWv1tOzo7e3hWI1VT6JZ/V+3qqIKPR56GUpCPuqmYnPiSzRwt/21zkD14XDCX7JLlzcRF+NMavZzRrF6C8PB1wbUziAhGgW6xHhlGLz3X16LFdeIKbdZTeGEWFM6J+orwdUNWLpYuB2tetzGOovyg7ODu2LtmqrVwB4Gvw0hoeyj19uQqoD483dFSvawoFSJQB5k811yjJUGvazlcJ9A/8fQDCRc8NB85Eh1pJN94j8e1rMcviTOfKaRvyVOJfrVQAbajB+qWxyWkmMw28X6jeBXd6hKGSnNyG+DE/2keh0Ghg+CpUy6ItLYcdceA2OS+vbXrC6JgKttvQ9OldL1ZnJdLwfk4L+GAjP31jtTryJGiaeL+lGkRDoyQI/HWUtHIXmo4BFnwIUHufQcwWgEyo42XMuJ0odnfVKxkfQ2UioxW79J1bfN30dluDVJ+snKR50Dwpv+1lQRym2EwL4Jt3sfviv/4/X5jFqxbrXcERpTSOn0j9p/PpuvyH2HaDc+QXC3uHW89SizNQsK9HKNCn/iAGM9WygUSj6cepVgojE="
+    on_success: change
+    on_failure: always
