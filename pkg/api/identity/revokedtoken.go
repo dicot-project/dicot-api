@@ -29,12 +29,12 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 )
 
-func NewRevokedTokenClient(cl *rest.RESTClient, namespace string) *RevokedTokenClient {
+func NewRevokedTokenClient(cl rest.Interface, namespace string) *RevokedTokenClient {
 	return &RevokedTokenClient{cl: cl, ns: namespace}
 }
 
 type RevokedTokenClient struct {
-	cl *rest.RESTClient
+	cl rest.Interface
 	ns string
 }
 

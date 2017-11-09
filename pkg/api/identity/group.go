@@ -29,12 +29,12 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 )
 
-func NewGroupClient(cl *rest.RESTClient, namespace string) *GroupClient {
+func NewGroupClient(cl rest.Interface, namespace string) *GroupClient {
 	return &GroupClient{cl: cl, ns: namespace}
 }
 
 type GroupClient struct {
-	cl *rest.RESTClient
+	cl rest.Interface
 	ns string
 }
 

@@ -33,11 +33,11 @@ import (
 
 type tokenHandler struct {
 	TokenManager auth.TokenManager
-	RESTClient   *k8srest.RESTClient
+	RESTClient   k8srest.Interface
 	AllowAnon    bool
 }
 
-func newTokenHandler(tokenManager auth.TokenManager, restClient *k8srest.RESTClient, allowAnon bool) Middleware {
+func newTokenHandler(tokenManager auth.TokenManager, restClient k8srest.Interface, allowAnon bool) Middleware {
 	return &tokenHandler{
 		TokenManager: tokenManager,
 		RESTClient:   restClient,
@@ -45,11 +45,11 @@ func newTokenHandler(tokenManager auth.TokenManager, restClient *k8srest.RESTCli
 	}
 }
 
-func NewTokenHandler(tokenManager auth.TokenManager, restClient *k8srest.RESTClient) Middleware {
+func NewTokenHandler(tokenManager auth.TokenManager, restClient k8srest.Interface) Middleware {
 	return newTokenHandler(tokenManager, restClient, false)
 }
 
-func NewTokenHandlerAllowAnon(tokenManager auth.TokenManager, restClient *k8srest.RESTClient) Middleware {
+func NewTokenHandlerAllowAnon(tokenManager auth.TokenManager, restClient k8srest.Interface) Middleware {
 	return newTokenHandler(tokenManager, restClient, true)
 }
 

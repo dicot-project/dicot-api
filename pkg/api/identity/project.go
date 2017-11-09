@@ -31,7 +31,7 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 )
 
-func NewProjectClient(cl *rest.RESTClient, namespace string) *ProjectClient {
+func NewProjectClient(cl rest.Interface, namespace string) *ProjectClient {
 	return &ProjectClient{cl: cl, ns: namespace}
 }
 
@@ -44,7 +44,7 @@ func FormatDomainNamespace(domainName string) string {
 }
 
 type ProjectClient struct {
-	cl *rest.RESTClient
+	cl rest.Interface
 	ns string
 }
 

@@ -29,12 +29,12 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 )
 
-func NewUserClient(cl *rest.RESTClient, namespace string) *UserClient {
+func NewUserClient(cl rest.Interface, namespace string) *UserClient {
 	return &UserClient{cl: cl, ns: namespace}
 }
 
 type UserClient struct {
-	cl *rest.RESTClient
+	cl rest.Interface
 	ns string
 }
 

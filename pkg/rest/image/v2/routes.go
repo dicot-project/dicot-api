@@ -29,15 +29,15 @@ import (
 )
 
 type service struct {
-	IdentityClient *k8srest.RESTClient
-	ImageClient    *k8srest.RESTClient
+	IdentityClient k8srest.Interface
+	ImageClient    k8srest.Interface
 	Prefix         string
 	ServerID       string
 	TokenManager   auth.TokenManager
 	ImageRepo      string
 }
 
-func NewService(identityClient *k8srest.RESTClient, imageClient *k8srest.RESTClient, tm auth.TokenManager, imagerepo string, serverID string, prefix string) rest.Service {
+func NewService(identityClient k8srest.Interface, imageClient k8srest.Interface, tm auth.TokenManager, imagerepo string, serverID string, prefix string) rest.Service {
 	if prefix == "" {
 		prefix = "/image"
 	}

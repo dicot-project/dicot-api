@@ -30,14 +30,14 @@ import (
 )
 
 type service struct {
-	IdentityClient *k8srest.RESTClient
+	IdentityClient k8srest.Interface
 	K8SClient      *k8s.Clientset
 	Prefix         string
 	Services       *rest.ServiceList
 	TokenManager   auth.TokenManager
 }
 
-func NewService(identityClient *k8srest.RESTClient, k8sClient *k8s.Clientset, tm auth.TokenManager, svcs *rest.ServiceList, prefix string) rest.Service {
+func NewService(identityClient k8srest.Interface, k8sClient *k8s.Clientset, tm auth.TokenManager, svcs *rest.ServiceList, prefix string) rest.Service {
 	if prefix == "" {
 		prefix = "/identity/v3"
 	}

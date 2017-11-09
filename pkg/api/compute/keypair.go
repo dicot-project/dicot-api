@@ -29,12 +29,12 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/compute/v1"
 )
 
-func NewKeypairClient(cl *rest.RESTClient, namespace string) *KeypairClient {
+func NewKeypairClient(cl rest.Interface, namespace string) *KeypairClient {
 	return &KeypairClient{cl: cl, ns: namespace}
 }
 
 type KeypairClient struct {
-	cl *rest.RESTClient
+	cl rest.Interface
 	ns string
 }
 

@@ -79,7 +79,7 @@ type tokenManager struct {
 	tokenClient *identity.RevokedTokenClient
 }
 
-func NewTokenManagerFromPEM(keyPEM string, lifetime time.Duration, cl *rest.RESTClient) (TokenManager, error) {
+func NewTokenManagerFromPEM(keyPEM string, lifetime time.Duration, cl rest.Interface) (TokenManager, error) {
 	keys, err := crypto.LoadPEMKeys([]byte(keyPEM))
 	if err != nil {
 		return nil, err
@@ -91,7 +91,7 @@ func NewTokenManagerFromPEM(keyPEM string, lifetime time.Duration, cl *rest.REST
 	return NewTokenManager(keys, lifetime, cl), nil
 }
 
-func NewTokenManager(keys []interface{}, lifetime time.Duration, cl *rest.RESTClient) TokenManager {
+func NewTokenManager(keys []interface{}, lifetime time.Duration, cl rest.Interface) TokenManager {
 	return &tokenManager{
 		keys:        keys,
 		lifetime:    lifetime,

@@ -103,12 +103,12 @@ func IsValidDiskFormat(fmt string) bool {
 	return false
 }
 
-func NewImageClient(cl *rest.RESTClient, namespace string) *ImageClient {
+func NewImageClient(cl rest.Interface, namespace string) *ImageClient {
 	return &ImageClient{cl: cl, ns: namespace}
 }
 
 type ImageClient struct {
-	cl *rest.RESTClient
+	cl rest.Interface
 	ns string
 }
 

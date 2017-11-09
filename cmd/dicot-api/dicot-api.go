@@ -59,7 +59,7 @@ func GetClientConfig(kubeconfig string) (*k8srest.Config, error) {
 	return k8srest.InClusterConfig()
 }
 
-func GetDicotClient(kubeconfig string, version *schema.GroupVersion) (*k8srest.RESTClient, error) {
+func GetDicotClient(kubeconfig string, version *schema.GroupVersion) (k8srest.Interface, error) {
 	config, err := GetClientConfig(kubeconfig)
 	if err != nil {
 		return nil, err
@@ -78,15 +78,15 @@ func GetDicotClient(kubeconfig string, version *schema.GroupVersion) (*k8srest.R
 	return restclient, nil
 }
 
-func GetDicotIdentityClient(kubeconfig string) (*k8srest.RESTClient, error) {
+func GetDicotIdentityClient(kubeconfig string) (k8srest.Interface, error) {
 	return GetDicotClient(kubeconfig, &identityapiv1.GroupVersion)
 }
 
-func GetDicotComputeClient(kubeconfig string) (*k8srest.RESTClient, error) {
+func GetDicotComputeClient(kubeconfig string) (k8srest.Interface, error) {
 	return GetDicotClient(kubeconfig, &computeapiv1.GroupVersion)
 }
 
-func GetDicotImageClient(kubeconfig string) (*k8srest.RESTClient, error) {
+func GetDicotImageClient(kubeconfig string) (k8srest.Interface, error) {
 	return GetDicotClient(kubeconfig, &imageapiv1.GroupVersion)
 }
 
@@ -99,7 +99,7 @@ func GetKubernetesClient(kubeconfig string) (*k8s.Clientset, error) {
 	return k8s.NewForConfig(config)
 }
 
-func GetTokenManager(cl *k8srest.RESTClient) (auth.TokenManager, error) {
+func GetTokenManager(cl k8srest.Interface) (auth.TokenManager, error) {
 	key, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
 	if err != nil {
 		return nil, err

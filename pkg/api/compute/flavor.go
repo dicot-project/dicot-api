@@ -29,12 +29,12 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/compute/v1"
 )
 
-func NewFlavorClient(cl *rest.RESTClient, namespace string) *FlavorClient {
+func NewFlavorClient(cl rest.Interface, namespace string) *FlavorClient {
 	return &FlavorClient{cl: cl, ns: namespace}
 }
 
 type FlavorClient struct {
-	cl *rest.RESTClient
+	cl rest.Interface
 	ns string
 }
 
