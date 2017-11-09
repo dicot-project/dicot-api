@@ -107,6 +107,10 @@ func NewImageClient(cl rest.Interface, namespace string) ImageInterface {
 	return &images{cl: cl, ns: namespace}
 }
 
+type ImageGetter interface {
+	Images(namespace string) ImageInterface
+}
+
 type ImageInterface interface {
 	Create(obj *v1.Image) (*v1.Image, error)
 	Update(obj *v1.Image) (*v1.Image, error)

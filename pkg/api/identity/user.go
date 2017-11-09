@@ -38,6 +38,10 @@ type users struct {
 	ns string
 }
 
+type UserGetter interface {
+	Users(namespace string) UserInterface
+}
+
 type UserInterface interface {
 	Create(obj *v1.User) (*v1.User, error)
 	Update(obj *v1.User) (*v1.User, error)

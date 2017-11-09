@@ -38,6 +38,10 @@ type flavors struct {
 	ns string
 }
 
+type FlavorGetter interface {
+	Flavors(namespace string) FlavorInterface
+}
+
 type FlavorInterface interface {
 	Create(obj *v1.Flavor) (*v1.Flavor, error)
 	Update(obj *v1.Flavor) (*v1.Flavor, error)

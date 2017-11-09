@@ -38,6 +38,10 @@ type groups struct {
 	ns string
 }
 
+type GroupGetter interface {
+	Groups(namespace string) GroupInterface
+}
+
 type GroupInterface interface {
 	Create(obj *v1.Group) (*v1.Group, error)
 	Update(obj *v1.Group) (*v1.Group, error)

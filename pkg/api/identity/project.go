@@ -48,6 +48,10 @@ type projects struct {
 	ns string
 }
 
+type ProjectGetter interface {
+	Projects(namespace string) ProjectInterface
+}
+
 type ProjectInterface interface {
 	Create(obj *v1.Project) (*v1.Project, error)
 	Update(obj *v1.Project) (*v1.Project, error)

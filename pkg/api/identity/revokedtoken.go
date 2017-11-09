@@ -38,6 +38,10 @@ type revokedTokens struct {
 	ns string
 }
 
+type RevokedTokenGetter interface {
+	RevokedTokens(namespace string) RevokedTokenInterface
+}
+
 type RevokedTokenInterface interface {
 	Create(obj *v1.RevokedToken) (*v1.RevokedToken, error)
 	Update(obj *v1.RevokedToken) (*v1.RevokedToken, error)

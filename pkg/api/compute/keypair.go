@@ -38,6 +38,10 @@ type keypairs struct {
 	ns string
 }
 
+type KeypairGetter interface {
+	Keypairs(namespace string) KeypairInterface
+}
+
 type KeypairInterface interface {
 	Create(obj *v1.Keypair) (*v1.Keypair, error)
 	Update(obj *v1.Keypair) (*v1.Keypair, error)
