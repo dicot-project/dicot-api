@@ -29,16 +29,26 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/compute/v1"
 )
 
-func NewFlavorClient(cl rest.Interface, namespace string) *FlavorClient {
-	return &FlavorClient{cl: cl, ns: namespace}
+func NewFlavorClient(cl rest.Interface, namespace string) FlavorInterface {
+	return &flavors{cl: cl, ns: namespace}
 }
 
-type FlavorClient struct {
+type flavors struct {
 	cl rest.Interface
 	ns string
 }
 
-func (f *FlavorClient) Create(obj *v1.Flavor) (*v1.Flavor, error) {
+type FlavorInterface interface {
+	Create(obj *v1.Flavor) (*v1.Flavor, error)
+	Update(obj *v1.Flavor) (*v1.Flavor, error)
+	Delete(name string, options *meta_v1.DeleteOptions) error
+	Get(name string) (*v1.Flavor, error)
+	GetByID(id string) (*v1.Flavor, error)
+	List() (*v1.FlavorList, error)
+	NewListWatch() *cache.ListWatch
+}
+
+func (f *flavors) Create(obj *v1.Flavor) (*v1.Flavor, error) {
 	var result v1.Flavor
 	err := f.cl.Post().
 		Namespace(f.ns).Resource("flavors").
@@ -50,7 +60,7 @@ func (f *FlavorClient) Create(obj *v1.Flavor) (*v1.Flavor, error) {
 
 }
 
-func (f *FlavorClient) Update(obj *v1.Flavor) (*v1.Flavor, error) {
+func (f *flavors) Update(obj *v1.Flavor) (*v1.Flavor, error) {
 	var result v1.Flavor
 	name := obj.GetObjectMeta().GetName()
 	err := f.cl.Put().
@@ -63,14 +73,14 @@ func (f *FlavorClient) Update(obj *v1.Flavor) (*v1.Flavor, error) {
 
 }
 
-func (f *FlavorClient) Delete(name string, options *meta_v1.DeleteOptions) error {
+func (f *flavors) Delete(name string, options *meta_v1.DeleteOptions) error {
 	return f.cl.Delete().
 		Namespace(f.ns).Resource("flavors").
 		Name(name).Body(options).Do().
 		Error()
 }
 
-func (f *FlavorClient) Get(name string) (*v1.Flavor, error) {
+func (f *flavors) Get(name string) (*v1.Flavor, error) {
 	var result v1.Flavor
 	err := f.cl.Get().
 		Namespace(f.ns).Resource("flavors").
@@ -81,7 +91,7 @@ func (f *FlavorClient) Get(name string) (*v1.Flavor, error) {
 	return &result, nil
 }
 
-func (f *FlavorClient) GetByID(id string) (*v1.Flavor, error) {
+func (f *flavors) GetByID(id string) (*v1.Flavor, error) {
 	list, err := f.List()
 	if err != nil {
 		return nil, err
@@ -95,7 +105,7 @@ func (f *FlavorClient) GetByID(id string) (*v1.Flavor, error) {
 	return nil, errors.NewNotFound(v1.Resource("flavor"), id)
 }
 
-func (f *FlavorClient) List() (*v1.FlavorList, error) {
+func (f *flavors) List() (*v1.FlavorList, error) {
 	var result v1.FlavorList
 	err := f.cl.Get().
 		Namespace(f.ns).Resource("flavors").
@@ -107,6 +117,6 @@ func (f *FlavorClient) List() (*v1.FlavorList, error) {
 
 }
 
-func (f *FlavorClient) NewListWatch() *cache.ListWatch {
+func (f *flavors) NewListWatch() *cache.ListWatch {
 	return cache.NewListWatchFromClient(f.cl, "flavors", f.ns, fields.Everything())
 }

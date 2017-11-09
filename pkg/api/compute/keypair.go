@@ -29,16 +29,26 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/compute/v1"
 )
 
-func NewKeypairClient(cl rest.Interface, namespace string) *KeypairClient {
-	return &KeypairClient{cl: cl, ns: namespace}
+func NewKeypairClient(cl rest.Interface, namespace string) KeypairInterface {
+	return &keypairs{cl: cl, ns: namespace}
 }
 
-type KeypairClient struct {
+type keypairs struct {
 	cl rest.Interface
 	ns string
 }
 
-func (kpc *KeypairClient) Create(obj *v1.Keypair) (*v1.Keypair, error) {
+type KeypairInterface interface {
+	Create(obj *v1.Keypair) (*v1.Keypair, error)
+	Update(obj *v1.Keypair) (*v1.Keypair, error)
+	Delete(name string, options *meta_v1.DeleteOptions) error
+	Get(name string) (*v1.Keypair, error)
+	Exists(name string) (bool, error)
+	List() (*v1.KeypairList, error)
+	NewListWatch() *cache.ListWatch
+}
+
+func (kpc *keypairs) Create(obj *v1.Keypair) (*v1.Keypair, error) {
 	var result v1.Keypair
 	err := kpc.cl.Post().
 		Namespace(kpc.ns).Resource("keypairs").
@@ -50,7 +60,7 @@ func (kpc *KeypairClient) Create(obj *v1.Keypair) (*v1.Keypair, error) {
 
 }
 
-func (kpc *KeypairClient) Update(obj *v1.Keypair) (*v1.Keypair, error) {
+func (kpc *keypairs) Update(obj *v1.Keypair) (*v1.Keypair, error) {
 	var result v1.Keypair
 	name := obj.GetObjectMeta().GetName()
 	err := kpc.cl.Put().
@@ -63,14 +73,14 @@ func (kpc *KeypairClient) Update(obj *v1.Keypair) (*v1.Keypair, error) {
 
 }
 
-func (kpc *KeypairClient) Delete(name string, options *meta_v1.DeleteOptions) error {
+func (kpc *keypairs) Delete(name string, options *meta_v1.DeleteOptions) error {
 	return kpc.cl.Delete().
 		Namespace(kpc.ns).Resource("keypairs").
 		Name(name).Body(options).Do().
 		Error()
 }
 
-func (kpc *KeypairClient) Get(name string) (*v1.Keypair, error) {
+func (kpc *keypairs) Get(name string) (*v1.Keypair, error) {
 	var result v1.Keypair
 	err := kpc.cl.Get().
 		Namespace(kpc.ns).Resource("keypairs").
@@ -81,7 +91,7 @@ func (kpc *KeypairClient) Get(name string) (*v1.Keypair, error) {
 	return &result, nil
 }
 
-func (kpc *KeypairClient) Exists(name string) (bool, error) {
+func (kpc *keypairs) Exists(name string) (bool, error) {
 	_, err := kpc.Get(name)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -92,7 +102,7 @@ func (kpc *KeypairClient) Exists(name string) (bool, error) {
 	return true, nil
 }
 
-func (kpc *KeypairClient) List() (*v1.KeypairList, error) {
+func (kpc *keypairs) List() (*v1.KeypairList, error) {
 	var result v1.KeypairList
 	err := kpc.cl.Get().
 		Namespace(kpc.ns).Resource("keypairs").
@@ -104,6 +114,6 @@ func (kpc *KeypairClient) List() (*v1.KeypairList, error) {
 
 }
 
-func (kpc *KeypairClient) NewListWatch() *cache.ListWatch {
+func (kpc *keypairs) NewListWatch() *cache.ListWatch {
 	return cache.NewListWatchFromClient(kpc.cl, "keypairs", kpc.ns, fields.Everything())
 }

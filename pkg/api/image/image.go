@@ -103,16 +103,26 @@ func IsValidDiskFormat(fmt string) bool {
 	return false
 }
 
-func NewImageClient(cl rest.Interface, namespace string) *ImageClient {
-	return &ImageClient{cl: cl, ns: namespace}
+func NewImageClient(cl rest.Interface, namespace string) ImageInterface {
+	return &images{cl: cl, ns: namespace}
 }
 
-type ImageClient struct {
+type ImageInterface interface {
+	Create(obj *v1.Image) (*v1.Image, error)
+	Update(obj *v1.Image) (*v1.Image, error)
+	Delete(name string, options *meta_v1.DeleteOptions) error
+	Get(name string) (*v1.Image, error)
+	GetByID(id string) (*v1.Image, error)
+	List() (*v1.ImageList, error)
+	NewListWatch() *cache.ListWatch
+}
+
+type images struct {
 	cl rest.Interface
 	ns string
 }
 
-func (f *ImageClient) Create(obj *v1.Image) (*v1.Image, error) {
+func (f *images) Create(obj *v1.Image) (*v1.Image, error) {
 	var result v1.Image
 	err := f.cl.Post().
 		Namespace(f.ns).Resource("images").
@@ -124,7 +134,7 @@ func (f *ImageClient) Create(obj *v1.Image) (*v1.Image, error) {
 
 }
 
-func (f *ImageClient) Update(obj *v1.Image) (*v1.Image, error) {
+func (f *images) Update(obj *v1.Image) (*v1.Image, error) {
 	var result v1.Image
 	name := obj.GetObjectMeta().GetName()
 	err := f.cl.Put().
@@ -137,14 +147,14 @@ func (f *ImageClient) Update(obj *v1.Image) (*v1.Image, error) {
 
 }
 
-func (f *ImageClient) Delete(name string, options *meta_v1.DeleteOptions) error {
+func (f *images) Delete(name string, options *meta_v1.DeleteOptions) error {
 	return f.cl.Delete().
 		Namespace(f.ns).Resource("images").
 		Name(name).Body(options).Do().
 		Error()
 }
 
-func (f *ImageClient) Get(name string) (*v1.Image, error) {
+func (f *images) Get(name string) (*v1.Image, error) {
 	var result v1.Image
 	err := f.cl.Get().
 		Namespace(f.ns).Resource("images").
@@ -155,7 +165,7 @@ func (f *ImageClient) Get(name string) (*v1.Image, error) {
 	return &result, nil
 }
 
-func (f *ImageClient) GetByID(id string) (*v1.Image, error) {
+func (f *images) GetByID(id string) (*v1.Image, error) {
 	list, err := f.List()
 	if err != nil {
 		return nil, err
@@ -169,7 +179,7 @@ func (f *ImageClient) GetByID(id string) (*v1.Image, error) {
 	return nil, errors.NewNotFound(v1.Resource("image"), id)
 }
 
-func (f *ImageClient) List() (*v1.ImageList, error) {
+func (f *images) List() (*v1.ImageList, error) {
 	var result v1.ImageList
 	err := f.cl.Get().
 		Namespace(f.ns).Resource("images").
@@ -181,6 +191,6 @@ func (f *ImageClient) List() (*v1.ImageList, error) {
 
 }
 
-func (f *ImageClient) NewListWatch() *cache.ListWatch {
+func (f *images) NewListWatch() *cache.ListWatch {
 	return cache.NewListWatchFromClient(f.cl, "images", f.ns, fields.Everything())
 }

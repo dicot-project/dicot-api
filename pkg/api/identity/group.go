@@ -29,16 +29,27 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 )
 
-func NewGroupClient(cl rest.Interface, namespace string) *GroupClient {
-	return &GroupClient{cl: cl, ns: namespace}
+func NewGroupClient(cl rest.Interface, namespace string) GroupInterface {
+	return &groups{cl: cl, ns: namespace}
 }
 
-type GroupClient struct {
+type groups struct {
 	cl rest.Interface
 	ns string
 }
 
-func (pc *GroupClient) Create(obj *v1.Group) (*v1.Group, error) {
+type GroupInterface interface {
+	Create(obj *v1.Group) (*v1.Group, error)
+	Update(obj *v1.Group) (*v1.Group, error)
+	Delete(name string, options *meta_v1.DeleteOptions) error
+	Get(name string) (*v1.Group, error)
+	GetByUID(id string) (*v1.Group, error)
+	Exists(name string) (bool, error)
+	List() (*v1.GroupList, error)
+	NewListWatch() *cache.ListWatch
+}
+
+func (pc *groups) Create(obj *v1.Group) (*v1.Group, error) {
 	var result v1.Group
 	err := pc.cl.Post().
 		Namespace(pc.ns).Resource("groups").
@@ -50,7 +61,7 @@ func (pc *GroupClient) Create(obj *v1.Group) (*v1.Group, error) {
 
 }
 
-func (pc *GroupClient) Update(obj *v1.Group) (*v1.Group, error) {
+func (pc *groups) Update(obj *v1.Group) (*v1.Group, error) {
 	var result v1.Group
 	name := obj.GetObjectMeta().GetName()
 	err := pc.cl.Put().
@@ -63,14 +74,14 @@ func (pc *GroupClient) Update(obj *v1.Group) (*v1.Group, error) {
 
 }
 
-func (pc *GroupClient) Delete(name string, options *meta_v1.DeleteOptions) error {
+func (pc *groups) Delete(name string, options *meta_v1.DeleteOptions) error {
 	return pc.cl.Delete().
 		Namespace(pc.ns).Resource("groups").
 		Name(name).Body(options).Do().
 		Error()
 }
 
-func (pc *GroupClient) Get(name string) (*v1.Group, error) {
+func (pc *groups) Get(name string) (*v1.Group, error) {
 	var result v1.Group
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("groups").
@@ -82,7 +93,7 @@ func (pc *GroupClient) Get(name string) (*v1.Group, error) {
 
 }
 
-func (pc *GroupClient) GetByUID(uid string) (*v1.Group, error) {
+func (pc *groups) GetByUID(uid string) (*v1.Group, error) {
 	list, err := pc.List()
 	if err != nil {
 		return nil, err
@@ -95,7 +106,7 @@ func (pc *GroupClient) GetByUID(uid string) (*v1.Group, error) {
 	return nil, errors.NewNotFound(v1.Resource("group"), uid)
 }
 
-func (pc *GroupClient) Exists(name string) (bool, error) {
+func (pc *groups) Exists(name string) (bool, error) {
 	_, err := pc.Get(name)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -106,7 +117,7 @@ func (pc *GroupClient) Exists(name string) (bool, error) {
 	return true, nil
 }
 
-func (pc *GroupClient) List() (*v1.GroupList, error) {
+func (pc *groups) List() (*v1.GroupList, error) {
 	var result v1.GroupList
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("groups").
@@ -118,6 +129,6 @@ func (pc *GroupClient) List() (*v1.GroupList, error) {
 
 }
 
-func (pc *GroupClient) NewListWatch() *cache.ListWatch {
+func (pc *groups) NewListWatch() *cache.ListWatch {
 	return cache.NewListWatchFromClient(pc.cl, "groups", pc.ns, fields.Everything())
 }

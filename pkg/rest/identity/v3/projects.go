@@ -131,7 +131,7 @@ func (svc *service) ProjectCreate(c *gin.Context) {
 	var parentID string
 	var domainID string
 	var namespace string
-	var clnt *identity.ProjectClient
+	var clnt identity.ProjectInterface
 	domClnt := identity.NewProjectClient(svc.IdentityClient, v1.NamespaceSystem)
 	if req.Project.IsDomain {
 		exists, err := domClnt.Exists(req.Project.Name)

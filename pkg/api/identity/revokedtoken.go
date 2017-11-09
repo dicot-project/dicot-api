@@ -29,16 +29,27 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 )
 
-func NewRevokedTokenClient(cl rest.Interface, namespace string) *RevokedTokenClient {
-	return &RevokedTokenClient{cl: cl, ns: namespace}
+func NewRevokedTokenClient(cl rest.Interface, namespace string) RevokedTokenInterface {
+	return &revokedTokens{cl: cl, ns: namespace}
 }
 
-type RevokedTokenClient struct {
+type revokedTokens struct {
 	cl rest.Interface
 	ns string
 }
 
-func (pc *RevokedTokenClient) Create(obj *v1.RevokedToken) (*v1.RevokedToken, error) {
+type RevokedTokenInterface interface {
+	Create(obj *v1.RevokedToken) (*v1.RevokedToken, error)
+	Update(obj *v1.RevokedToken) (*v1.RevokedToken, error)
+	Delete(name string, options *meta_v1.DeleteOptions) error
+	Get(name string) (*v1.RevokedToken, error)
+	GetByUID(id string) (*v1.RevokedToken, error)
+	Exists(name string) (bool, error)
+	List() (*v1.RevokedTokenList, error)
+	NewListWatch() *cache.ListWatch
+}
+
+func (pc *revokedTokens) Create(obj *v1.RevokedToken) (*v1.RevokedToken, error) {
 	var result v1.RevokedToken
 	err := pc.cl.Post().
 		Namespace(pc.ns).Resource("revokedtokens").
@@ -50,7 +61,7 @@ func (pc *RevokedTokenClient) Create(obj *v1.RevokedToken) (*v1.RevokedToken, er
 
 }
 
-func (pc *RevokedTokenClient) Update(obj *v1.RevokedToken) (*v1.RevokedToken, error) {
+func (pc *revokedTokens) Update(obj *v1.RevokedToken) (*v1.RevokedToken, error) {
 	var result v1.RevokedToken
 	name := obj.GetObjectMeta().GetName()
 	err := pc.cl.Put().
@@ -63,14 +74,14 @@ func (pc *RevokedTokenClient) Update(obj *v1.RevokedToken) (*v1.RevokedToken, er
 
 }
 
-func (pc *RevokedTokenClient) Delete(name string, options *meta_v1.DeleteOptions) error {
+func (pc *revokedTokens) Delete(name string, options *meta_v1.DeleteOptions) error {
 	return pc.cl.Delete().
 		Namespace(pc.ns).Resource("revokedtokens").
 		Name(name).Body(options).Do().
 		Error()
 }
 
-func (pc *RevokedTokenClient) Get(name string) (*v1.RevokedToken, error) {
+func (pc *revokedTokens) Get(name string) (*v1.RevokedToken, error) {
 	var result v1.RevokedToken
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("revokedtokens").
@@ -82,7 +93,7 @@ func (pc *RevokedTokenClient) Get(name string) (*v1.RevokedToken, error) {
 
 }
 
-func (pc *RevokedTokenClient) GetByUID(uid string) (*v1.RevokedToken, error) {
+func (pc *revokedTokens) GetByUID(uid string) (*v1.RevokedToken, error) {
 	list, err := pc.List()
 	if err != nil {
 		return nil, err
@@ -95,7 +106,7 @@ func (pc *RevokedTokenClient) GetByUID(uid string) (*v1.RevokedToken, error) {
 	return nil, errors.NewNotFound(v1.Resource("revokedtoken"), uid)
 }
 
-func (pc *RevokedTokenClient) Exists(name string) (bool, error) {
+func (pc *revokedTokens) Exists(name string) (bool, error) {
 	_, err := pc.Get(name)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -106,7 +117,7 @@ func (pc *RevokedTokenClient) Exists(name string) (bool, error) {
 	return true, nil
 }
 
-func (pc *RevokedTokenClient) List() (*v1.RevokedTokenList, error) {
+func (pc *revokedTokens) List() (*v1.RevokedTokenList, error) {
 	var result v1.RevokedTokenList
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("revokedtokens").
@@ -118,6 +129,6 @@ func (pc *RevokedTokenClient) List() (*v1.RevokedTokenList, error) {
 
 }
 
-func (pc *RevokedTokenClient) NewListWatch() *cache.ListWatch {
+func (pc *revokedTokens) NewListWatch() *cache.ListWatch {
 	return cache.NewListWatchFromClient(pc.cl, "revokedtokens", pc.ns, fields.Everything())
 }

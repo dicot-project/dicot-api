@@ -31,8 +31,8 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 )
 
-func NewProjectClient(cl rest.Interface, namespace string) *ProjectClient {
-	return &ProjectClient{cl: cl, ns: namespace}
+func NewProjectClient(cl rest.Interface, namespace string) ProjectInterface {
+	return &projects{cl: cl, ns: namespace}
 }
 
 func FormatProjectNamespace(domainName, projectName string) string {
@@ -43,12 +43,23 @@ func FormatDomainNamespace(domainName string) string {
 	return fmt.Sprintf("dicot-domain-%s", domainName)
 }
 
-type ProjectClient struct {
+type projects struct {
 	cl rest.Interface
 	ns string
 }
 
-func (pc *ProjectClient) Create(obj *v1.Project) (*v1.Project, error) {
+type ProjectInterface interface {
+	Create(obj *v1.Project) (*v1.Project, error)
+	Update(obj *v1.Project) (*v1.Project, error)
+	Delete(name string, options *meta_v1.DeleteOptions) error
+	Get(name string) (*v1.Project, error)
+	GetByUID(id string) (*v1.Project, error)
+	Exists(name string) (bool, error)
+	List() (*v1.ProjectList, error)
+	NewListWatch() *cache.ListWatch
+}
+
+func (pc *projects) Create(obj *v1.Project) (*v1.Project, error) {
 	var result v1.Project
 	err := pc.cl.Post().
 		Namespace(pc.ns).Resource("projects").
@@ -60,7 +71,7 @@ func (pc *ProjectClient) Create(obj *v1.Project) (*v1.Project, error) {
 
 }
 
-func (pc *ProjectClient) Update(obj *v1.Project) (*v1.Project, error) {
+func (pc *projects) Update(obj *v1.Project) (*v1.Project, error) {
 	var result v1.Project
 	name := obj.GetObjectMeta().GetName()
 	err := pc.cl.Put().
@@ -73,14 +84,14 @@ func (pc *ProjectClient) Update(obj *v1.Project) (*v1.Project, error) {
 
 }
 
-func (pc *ProjectClient) Delete(name string, options *meta_v1.DeleteOptions) error {
+func (pc *projects) Delete(name string, options *meta_v1.DeleteOptions) error {
 	return pc.cl.Delete().
 		Namespace(pc.ns).Resource("projects").
 		Name(name).Body(options).Do().
 		Error()
 }
 
-func (pc *ProjectClient) Get(name string) (*v1.Project, error) {
+func (pc *projects) Get(name string) (*v1.Project, error) {
 	var result v1.Project
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("projects").
@@ -92,7 +103,7 @@ func (pc *ProjectClient) Get(name string) (*v1.Project, error) {
 
 }
 
-func (pc *ProjectClient) GetByUID(uid string) (*v1.Project, error) {
+func (pc *projects) GetByUID(uid string) (*v1.Project, error) {
 	list, err := pc.List()
 	if err != nil {
 		return nil, err
@@ -105,7 +116,7 @@ func (pc *ProjectClient) GetByUID(uid string) (*v1.Project, error) {
 	return nil, errors.NewNotFound(v1.Resource("project"), uid)
 }
 
-func (pc *ProjectClient) Exists(name string) (bool, error) {
+func (pc *projects) Exists(name string) (bool, error) {
 	_, err := pc.Get(name)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -116,7 +127,7 @@ func (pc *ProjectClient) Exists(name string) (bool, error) {
 	return true, nil
 }
 
-func (pc *ProjectClient) List() (*v1.ProjectList, error) {
+func (pc *projects) List() (*v1.ProjectList, error) {
 	var result v1.ProjectList
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("projects").
@@ -128,6 +139,6 @@ func (pc *ProjectClient) List() (*v1.ProjectList, error) {
 
 }
 
-func (pc *ProjectClient) NewListWatch() *cache.ListWatch {
+func (pc *projects) NewListWatch() *cache.ListWatch {
 	return cache.NewListWatchFromClient(pc.cl, "projects", pc.ns, fields.Everything())
 }

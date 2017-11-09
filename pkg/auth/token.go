@@ -76,7 +76,7 @@ type TokenScope struct {
 type tokenManager struct {
 	keys        []interface{}
 	lifetime    time.Duration
-	tokenClient *identity.RevokedTokenClient
+	tokenClient identity.RevokedTokenInterface
 }
 
 func NewTokenManagerFromPEM(keyPEM string, lifetime time.Duration, cl rest.Interface) (TokenManager, error) {

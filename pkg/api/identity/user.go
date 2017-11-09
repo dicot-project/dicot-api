@@ -29,16 +29,27 @@ import (
 	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
 )
 
-func NewUserClient(cl rest.Interface, namespace string) *UserClient {
-	return &UserClient{cl: cl, ns: namespace}
+func NewUserClient(cl rest.Interface, namespace string) UserInterface {
+	return &users{cl: cl, ns: namespace}
 }
 
-type UserClient struct {
+type users struct {
 	cl rest.Interface
 	ns string
 }
 
-func (pc *UserClient) Create(obj *v1.User) (*v1.User, error) {
+type UserInterface interface {
+	Create(obj *v1.User) (*v1.User, error)
+	Update(obj *v1.User) (*v1.User, error)
+	Delete(name string, options *meta_v1.DeleteOptions) error
+	Get(name string) (*v1.User, error)
+	GetByUID(id string) (*v1.User, error)
+	Exists(name string) (bool, error)
+	List() (*v1.UserList, error)
+	NewListWatch() *cache.ListWatch
+}
+
+func (pc *users) Create(obj *v1.User) (*v1.User, error) {
 	var result v1.User
 	err := pc.cl.Post().
 		Namespace(pc.ns).Resource("users").
@@ -50,7 +61,7 @@ func (pc *UserClient) Create(obj *v1.User) (*v1.User, error) {
 
 }
 
-func (pc *UserClient) Update(obj *v1.User) (*v1.User, error) {
+func (pc *users) Update(obj *v1.User) (*v1.User, error) {
 	var result v1.User
 	name := obj.GetObjectMeta().GetName()
 	err := pc.cl.Put().
@@ -63,14 +74,14 @@ func (pc *UserClient) Update(obj *v1.User) (*v1.User, error) {
 
 }
 
-func (pc *UserClient) Delete(name string, options *meta_v1.DeleteOptions) error {
+func (pc *users) Delete(name string, options *meta_v1.DeleteOptions) error {
 	return pc.cl.Delete().
 		Namespace(pc.ns).Resource("users").
 		Name(name).Body(options).Do().
 		Error()
 }
 
-func (pc *UserClient) Get(name string) (*v1.User, error) {
+func (pc *users) Get(name string) (*v1.User, error) {
 	var result v1.User
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("users").
@@ -82,7 +93,7 @@ func (pc *UserClient) Get(name string) (*v1.User, error) {
 
 }
 
-func (pc *UserClient) GetByUID(uid string) (*v1.User, error) {
+func (pc *users) GetByUID(uid string) (*v1.User, error) {
 	list, err := pc.List()
 	if err != nil {
 		return nil, err
@@ -95,7 +106,7 @@ func (pc *UserClient) GetByUID(uid string) (*v1.User, error) {
 	return nil, errors.NewNotFound(v1.Resource("user"), uid)
 }
 
-func (pc *UserClient) Exists(name string) (bool, error) {
+func (pc *users) Exists(name string) (bool, error) {
 	_, err := pc.Get(name)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -106,7 +117,7 @@ func (pc *UserClient) Exists(name string) (bool, error) {
 	return true, nil
 }
 
-func (pc *UserClient) List() (*v1.UserList, error) {
+func (pc *users) List() (*v1.UserList, error) {
 	var result v1.UserList
 	err := pc.cl.Get().
 		Namespace(pc.ns).Resource("users").
@@ -118,6 +129,6 @@ func (pc *UserClient) List() (*v1.UserList, error) {
 
 }
 
-func (pc *UserClient) NewListWatch() *cache.ListWatch {
+func (pc *users) NewListWatch() *cache.ListWatch {
 	return cache.NewListWatchFromClient(pc.cl, "users", pc.ns, fields.Everything())
 }
