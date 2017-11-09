@@ -90,7 +90,7 @@ func GetDicotImageClient(kubeconfig string) (k8srest.Interface, error) {
 	return GetDicotClient(kubeconfig, &imageapiv1.GroupVersion)
 }
 
-func GetKubernetesClient(kubeconfig string) (*k8s.Clientset, error) {
+func GetKubernetesClient(kubeconfig string) (k8s.Interface, error) {
 	config, err := GetClientConfig(kubeconfig)
 	if err != nil {
 		return nil, err

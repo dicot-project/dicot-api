@@ -139,7 +139,7 @@ func (svc *service) DomainCreate(c *gin.Context) {
 		return
 	}
 
-	projectNS, err = svc.K8SClient.Namespaces().Create(projectNS)
+	projectNS, err = svc.K8SClient.CoreV1().Namespaces().Create(projectNS)
 	if err != nil {
 		clnt.Delete(project.ObjectMeta.Name, nil)
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -256,7 +256,7 @@ func (svc *service) DomainDelete(c *gin.Context) {
 		return
 	}
 
-	_ = svc.K8SClient.Namespaces().Delete(project.Spec.Namespace, nil)
+	_ = svc.K8SClient.CoreV1().Namespaces().Delete(project.Spec.Namespace, nil)
 
 	c.String(http.StatusNoContent, "")
 }
