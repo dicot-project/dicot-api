@@ -27,7 +27,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/dicot-project/dicot-api/pkg/api/compute"
 	"github.com/dicot-project/dicot-api/pkg/api/compute/v1"
 	"github.com/dicot-project/dicot-api/pkg/crypto"
 	"github.com/dicot-project/dicot-api/pkg/rest"
@@ -80,7 +79,7 @@ func (svc *service) KeypairList(c *gin.Context) {
 	marker := c.Query("marker")
 	filterLimit, limit := GetFilterUInt(c, "limit")
 
-	clnt := compute.NewKeypairClient(svc.ComputeClient, proj.Spec.Namespace)
+	clnt := svc.Client.Compute().Keypairs(proj.Spec.Namespace)
 
 	keypairs, err := clnt.List()
 	if err != nil {
@@ -140,7 +139,7 @@ func (svc *service) KeypairCreate(c *gin.Context) {
 		return
 	}
 
-	clnt := compute.NewKeypairClient(svc.ComputeClient, proj.Spec.Namespace)
+	clnt := svc.Client.Compute().Keypairs(proj.Spec.Namespace)
 
 	exists, err := clnt.Exists(req.Keypair.Name)
 	if err != nil {
@@ -214,7 +213,7 @@ func (svc *service) KeypairShow(c *gin.Context) {
 	proj := middleware.RequiredTokenScopeProject(c)
 	name := c.Param("name")
 
-	clnt := compute.NewKeypairClient(svc.ComputeClient, proj.Spec.Namespace)
+	clnt := svc.Client.Compute().Keypairs(proj.Spec.Namespace)
 
 	keypair, err := clnt.Get(name)
 	if err != nil {
@@ -246,7 +245,7 @@ func (svc *service) KeypairDelete(c *gin.Context) {
 	proj := middleware.RequiredTokenScopeProject(c)
 	name := c.Param("name")
 
-	clnt := compute.NewKeypairClient(svc.ComputeClient, proj.Spec.Namespace)
+	clnt := svc.Client.Compute().Keypairs(proj.Spec.Namespace)
 
 	keypair, err := clnt.Get(name)
 	if err != nil {

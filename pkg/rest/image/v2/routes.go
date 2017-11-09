@@ -21,33 +21,31 @@ package v2
 
 import (
 	"github.com/gin-gonic/gin"
-	k8srest "k8s.io/client-go/rest"
 
+	"github.com/dicot-project/dicot-api/pkg/api"
 	"github.com/dicot-project/dicot-api/pkg/auth"
 	"github.com/dicot-project/dicot-api/pkg/rest"
 	"github.com/dicot-project/dicot-api/pkg/rest/middleware"
 )
 
 type service struct {
-	IdentityClient k8srest.Interface
-	ImageClient    k8srest.Interface
-	Prefix         string
-	ServerID       string
-	TokenManager   auth.TokenManager
-	ImageRepo      string
+	Client       api.Interface
+	Prefix       string
+	ServerID     string
+	TokenManager auth.TokenManager
+	ImageRepo    string
 }
 
-func NewService(identityClient k8srest.Interface, imageClient k8srest.Interface, tm auth.TokenManager, imagerepo string, serverID string, prefix string) rest.Service {
+func NewService(client api.Interface, tm auth.TokenManager, imagerepo string, serverID string, prefix string) rest.Service {
 	if prefix == "" {
 		prefix = "/image"
 	}
 	return &service{
-		IdentityClient: identityClient,
-		ImageClient:    imageClient,
-		Prefix:         prefix,
-		ServerID:       serverID,
-		TokenManager:   tm,
-		ImageRepo:      imagerepo,
+		Client:       client,
+		Prefix:       prefix,
+		ServerID:     serverID,
+		TokenManager: tm,
+		ImageRepo:    imagerepo,
 	}
 }
 
@@ -68,7 +66,7 @@ func (svc *service) GetUID() string {
 }
 
 func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
-	router.Use(middleware.NewTokenHandler(svc.TokenManager, svc.IdentityClient).Handler())
+	router.Use(middleware.NewTokenHandler(svc.TokenManager, svc.Client.Identity()).Handler())
 
 	router.GET("/", svc.IndexShow)
 	router.GET("/versions", svc.VersionIndexShow)

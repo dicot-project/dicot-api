@@ -24,7 +24,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
-	k8srest "k8s.io/client-go/rest"
 
 	"github.com/dicot-project/dicot-api/pkg/api/identity"
 	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
@@ -33,29 +32,29 @@ import (
 
 type tokenHandler struct {
 	TokenManager auth.TokenManager
-	RESTClient   k8srest.Interface
+	Client       identity.Interface
 	AllowAnon    bool
 }
 
-func newTokenHandler(tokenManager auth.TokenManager, restClient k8srest.Interface, allowAnon bool) Middleware {
+func newTokenHandler(tokenManager auth.TokenManager, client identity.Interface, allowAnon bool) Middleware {
 	return &tokenHandler{
 		TokenManager: tokenManager,
-		RESTClient:   restClient,
+		Client:       client,
 		AllowAnon:    allowAnon,
 	}
 }
 
-func NewTokenHandler(tokenManager auth.TokenManager, restClient k8srest.Interface) Middleware {
-	return newTokenHandler(tokenManager, restClient, false)
+func NewTokenHandler(tokenManager auth.TokenManager, client identity.Interface) Middleware {
+	return newTokenHandler(tokenManager, client, false)
 }
 
-func NewTokenHandlerAllowAnon(tokenManager auth.TokenManager, restClient k8srest.Interface) Middleware {
-	return newTokenHandler(tokenManager, restClient, true)
+func NewTokenHandlerAllowAnon(tokenManager auth.TokenManager, client identity.Interface) Middleware {
+	return newTokenHandler(tokenManager, client, true)
 }
 
 func (h *tokenHandler) setToken(c *gin.Context, tok *auth.Token) error {
 	userNS := identity.FormatDomainNamespace(tok.Subject.DomainName)
-	userClnt := identity.NewUserClient(h.RESTClient, userNS)
+	userClnt := h.Client.Users(userNS)
 	glog.V(1).Infof("Lookup subject user '%s/%s'", userNS, tok.Subject.UserName)
 	user, err := userClnt.Get(tok.Subject.UserName)
 	if err != nil {
@@ -63,7 +62,7 @@ func (h *tokenHandler) setToken(c *gin.Context, tok *auth.Token) error {
 		return err
 	}
 
-	domainClnt := identity.NewProjectClient(h.RESTClient, v1.NamespaceSystem)
+	domainClnt := h.Client.Projects(v1.NamespaceSystem)
 	glog.V(1).Infof("Lookup scope domain '%s/%s'", v1.NamespaceSystem, tok.Scope.DomainName)
 	domain, err := domainClnt.Get(tok.Scope.DomainName)
 	if err != nil {
@@ -71,7 +70,7 @@ func (h *tokenHandler) setToken(c *gin.Context, tok *auth.Token) error {
 	}
 
 	projectNS := identity.FormatDomainNamespace(tok.Scope.DomainName)
-	projectClnt := identity.NewProjectClient(h.RESTClient, projectNS)
+	projectClnt := h.Client.Projects(projectNS)
 	glog.V(1).Infof("Lookup scope project '%s/%s'", projectNS, tok.Scope.ProjectName)
 	project, err := projectClnt.Get(tok.Scope.ProjectName)
 	if err != nil {

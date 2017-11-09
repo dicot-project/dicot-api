@@ -29,7 +29,6 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"k8s.io/apimachinery/pkg/util/uuid"
-	"k8s.io/client-go/rest"
 
 	"github.com/dicot-project/dicot-api/pkg/api/identity"
 	"github.com/dicot-project/dicot-api/pkg/api/identity/v1"
@@ -79,7 +78,7 @@ type tokenManager struct {
 	tokenClient identity.RevokedTokenInterface
 }
 
-func NewTokenManagerFromPEM(keyPEM string, lifetime time.Duration, cl rest.Interface) (TokenManager, error) {
+func NewTokenManagerFromPEM(keyPEM string, lifetime time.Duration, cl identity.Interface) (TokenManager, error) {
 	keys, err := crypto.LoadPEMKeys([]byte(keyPEM))
 	if err != nil {
 		return nil, err
@@ -91,11 +90,11 @@ func NewTokenManagerFromPEM(keyPEM string, lifetime time.Duration, cl rest.Inter
 	return NewTokenManager(keys, lifetime, cl), nil
 }
 
-func NewTokenManager(keys []interface{}, lifetime time.Duration, cl rest.Interface) TokenManager {
+func NewTokenManager(keys []interface{}, lifetime time.Duration, cl identity.Interface) TokenManager {
 	return &tokenManager{
 		keys:        keys,
 		lifetime:    lifetime,
-		tokenClient: identity.NewRevokedTokenClient(cl, v1.NamespaceSystem),
+		tokenClient: cl.RevokedTokens(v1.NamespaceSystem),
 	}
 }
 

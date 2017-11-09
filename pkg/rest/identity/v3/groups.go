@@ -71,7 +71,7 @@ func (svc *service) GroupList(c *gin.Context) {
 
 	groupNS := k8sv1.NamespaceAll
 	if domainID := c.Query("domain_id"); domainID != "" {
-		domClnt := identity.NewProjectClient(svc.IdentityClient, v1.NamespaceSystem)
+		domClnt := svc.Client.Identity().Projects(v1.NamespaceSystem)
 		dom, err := domClnt.GetByUID(domainID)
 		if err != nil {
 			c.AbortWithError(http.StatusBadRequest, err)
@@ -79,7 +79,7 @@ func (svc *service) GroupList(c *gin.Context) {
 		}
 		groupNS = dom.Spec.Namespace
 	}
-	clnt := identity.NewGroupClient(svc.IdentityClient, groupNS)
+	clnt := svc.Client.Identity().Groups(groupNS)
 
 	groups, err := clnt.List()
 	if err != nil {
@@ -117,7 +117,7 @@ func (svc *service) GroupCreate(c *gin.Context) {
 		return
 	}
 
-	domClnt := identity.NewProjectClient(svc.IdentityClient, v1.NamespaceSystem)
+	domClnt := svc.Client.Identity().Projects(v1.NamespaceSystem)
 
 	var domNamespace string
 	if req.Group.DomainID != "" {
@@ -136,7 +136,7 @@ func (svc *service) GroupCreate(c *gin.Context) {
 		domNamespace = dom.Spec.Namespace
 	}
 
-	clnt := identity.NewGroupClient(svc.IdentityClient, domNamespace)
+	clnt := svc.Client.Identity().Groups(domNamespace)
 
 	exists, err := clnt.Exists(req.Group.Name)
 	if err != nil {
@@ -181,7 +181,7 @@ func (svc *service) GroupCreate(c *gin.Context) {
 func (svc *service) GroupShow(c *gin.Context) {
 	groupID := c.Param("groupID")
 
-	clnt := identity.NewGroupClient(svc.IdentityClient, k8sv1.NamespaceAll)
+	clnt := svc.Client.Identity().Groups(k8sv1.NamespaceAll)
 
 	group, err := clnt.GetByUID(groupID)
 	if err != nil {
@@ -193,7 +193,7 @@ func (svc *service) GroupShow(c *gin.Context) {
 		return
 	}
 
-	clnt = identity.NewGroupClient(svc.IdentityClient, group.ObjectMeta.Namespace)
+	clnt = svc.Client.Identity().Groups(group.ObjectMeta.Namespace)
 
 	// XXX links
 	res := GroupShowRes{
@@ -218,7 +218,7 @@ func (svc *service) GroupUpdate(c *gin.Context) {
 
 	groupID := c.Param("groupID")
 
-	clnt := identity.NewGroupClient(svc.IdentityClient, k8sv1.NamespaceAll)
+	clnt := svc.Client.Identity().Groups(k8sv1.NamespaceAll)
 
 	group, err := clnt.GetByUID(groupID)
 	if err != nil {
@@ -230,7 +230,7 @@ func (svc *service) GroupUpdate(c *gin.Context) {
 		return
 	}
 
-	clnt = identity.NewGroupClient(svc.IdentityClient, group.ObjectMeta.Namespace)
+	clnt = svc.Client.Identity().Groups(group.ObjectMeta.Namespace)
 
 	if req.Group.Name != nil {
 		c.AbortWithStatus(http.StatusForbidden)
@@ -261,7 +261,7 @@ func (svc *service) GroupUpdate(c *gin.Context) {
 func (svc *service) GroupDelete(c *gin.Context) {
 	groupID := c.Param("groupID")
 
-	clnt := identity.NewGroupClient(svc.IdentityClient, k8sv1.NamespaceAll)
+	clnt := svc.Client.Identity().Groups(k8sv1.NamespaceAll)
 
 	group, err := clnt.GetByUID(groupID)
 	if err != nil {
@@ -273,7 +273,7 @@ func (svc *service) GroupDelete(c *gin.Context) {
 		return
 	}
 
-	clnt = identity.NewGroupClient(svc.IdentityClient, group.ObjectMeta.Namespace)
+	clnt = svc.Client.Identity().Groups(group.ObjectMeta.Namespace)
 
 	err = clnt.Delete(group.ObjectMeta.Name, nil)
 	if err != nil {
@@ -287,7 +287,7 @@ func (svc *service) GroupDelete(c *gin.Context) {
 func (svc *service) GroupUserList(c *gin.Context) {
 	groupID := c.Param("groupID")
 
-	groupClnt := identity.NewGroupClient(svc.IdentityClient, k8sv1.NamespaceAll)
+	groupClnt := svc.Client.Identity().Groups(k8sv1.NamespaceAll)
 
 	group, err := groupClnt.GetByUID(groupID)
 	if err != nil {
@@ -304,7 +304,7 @@ func (svc *service) GroupUserList(c *gin.Context) {
 		members[id] = true
 	}
 
-	userClnt := identity.NewUserClient(svc.IdentityClient, k8sv1.NamespaceAll)
+	userClnt := svc.Client.Identity().Users(k8sv1.NamespaceAll)
 	users, err := userClnt.List()
 	if err != nil {
 		c.AbortWithError(http.StatusInternalServerError, err)
@@ -341,7 +341,7 @@ func (svc *service) GroupUserAdd(c *gin.Context) {
 	groupID := c.Param("groupID")
 	userID := c.Param("userID")
 
-	groupClnt := identity.NewGroupClient(svc.IdentityClient, k8sv1.NamespaceAll)
+	groupClnt := svc.Client.Identity().Groups(k8sv1.NamespaceAll)
 
 	group, err := groupClnt.GetByUID(groupID)
 	if err != nil {
@@ -353,9 +353,9 @@ func (svc *service) GroupUserAdd(c *gin.Context) {
 		return
 	}
 
-	groupClnt = identity.NewGroupClient(svc.IdentityClient, group.ObjectMeta.Namespace)
+	groupClnt = svc.Client.Identity().Groups(group.ObjectMeta.Namespace)
 
-	userClnt := identity.NewUserClient(svc.IdentityClient, k8sv1.NamespaceAll)
+	userClnt := svc.Client.Identity().Users(k8sv1.NamespaceAll)
 	user, err := userClnt.GetByUID(userID)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -391,7 +391,7 @@ func (svc *service) GroupUserCheck(c *gin.Context) {
 	groupID := c.Param("groupID")
 	userID := c.Param("userID")
 
-	groupClnt := identity.NewGroupClient(svc.IdentityClient, k8sv1.NamespaceAll)
+	groupClnt := svc.Client.Identity().Groups(k8sv1.NamespaceAll)
 
 	group, err := groupClnt.GetByUID(groupID)
 	if err != nil {
@@ -427,7 +427,7 @@ func (svc *service) GroupUserDelete(c *gin.Context) {
 	groupID := c.Param("groupID")
 	userID := c.Param("userID")
 
-	groupClnt := identity.NewGroupClient(svc.IdentityClient, k8sv1.NamespaceAll)
+	groupClnt := svc.Client.Identity().Groups(k8sv1.NamespaceAll)
 
 	group, err := groupClnt.GetByUID(groupID)
 	if err != nil {
@@ -439,7 +439,7 @@ func (svc *service) GroupUserDelete(c *gin.Context) {
 		return
 	}
 
-	groupClnt = identity.NewGroupClient(svc.IdentityClient, group.ObjectMeta.Namespace)
+	groupClnt = svc.Client.Identity().Groups(group.ObjectMeta.Namespace)
 
 	/*
 	 * Intentionally not checking if user referenced by userID

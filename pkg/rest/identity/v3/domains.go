@@ -65,7 +65,7 @@ type DomainShowRes struct {
 func (svc *service) DomainList(c *gin.Context) {
 	name := c.Query("name")
 
-	clnt := identity.NewProjectClient(svc.IdentityClient, v1.NamespaceSystem)
+	clnt := svc.Client.Identity().Projects(v1.NamespaceSystem)
 
 	projects, err := clnt.List()
 	if err != nil {
@@ -104,7 +104,7 @@ func (svc *service) DomainCreate(c *gin.Context) {
 		return
 	}
 
-	clnt := identity.NewProjectClient(svc.IdentityClient, v1.NamespaceSystem)
+	clnt := svc.Client.Identity().Projects(v1.NamespaceSystem)
 
 	exists, err := clnt.Exists(req.Domain.Name)
 	if err != nil {
@@ -162,7 +162,7 @@ func (svc *service) DomainCreate(c *gin.Context) {
 func (svc *service) DomainShow(c *gin.Context) {
 	domainID := c.Param("domainID")
 
-	clnt := identity.NewProjectClient(svc.IdentityClient, v1.NamespaceSystem)
+	clnt := svc.Client.Identity().Projects(v1.NamespaceSystem)
 
 	project, err := clnt.GetByUID(domainID)
 	if err != nil {
@@ -197,7 +197,7 @@ func (svc *service) DomainUpdate(c *gin.Context) {
 
 	domainID := c.Param("domainID")
 
-	clnt := identity.NewProjectClient(svc.IdentityClient, v1.NamespaceSystem)
+	clnt := svc.Client.Identity().Projects(v1.NamespaceSystem)
 
 	project, err := clnt.GetByUID(domainID)
 	if err != nil {
@@ -238,7 +238,7 @@ func (svc *service) DomainUpdate(c *gin.Context) {
 func (svc *service) DomainDelete(c *gin.Context) {
 	domainID := c.Param("domainID")
 
-	clnt := identity.NewProjectClient(svc.IdentityClient, v1.NamespaceSystem)
+	clnt := svc.Client.Identity().Projects(v1.NamespaceSystem)
 
 	project, err := clnt.GetByUID(domainID)
 	if err != nil {

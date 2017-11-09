@@ -22,33 +22,31 @@ package v2_1
 import (
 	"github.com/gin-gonic/gin"
 	k8s "k8s.io/client-go/kubernetes"
-	k8srest "k8s.io/client-go/rest"
 
+	"github.com/dicot-project/dicot-api/pkg/api"
 	"github.com/dicot-project/dicot-api/pkg/auth"
 	"github.com/dicot-project/dicot-api/pkg/rest"
 	"github.com/dicot-project/dicot-api/pkg/rest/middleware"
 )
 
 type service struct {
-	IdentityClient k8srest.Interface
-	ComputeClient  k8srest.Interface
-	K8SClient      k8s.Interface
-	Prefix         string
-	ServerID       string
-	TokenManager   auth.TokenManager
+	Client       api.Interface
+	K8SClient    k8s.Interface
+	Prefix       string
+	ServerID     string
+	TokenManager auth.TokenManager
 }
 
-func NewService(identityClient k8srest.Interface, computeClient k8srest.Interface, k8sClient k8s.Interface, tm auth.TokenManager, serverID string, prefix string) rest.Service {
+func NewService(client api.Interface, k8sClient k8s.Interface, tm auth.TokenManager, serverID string, prefix string) rest.Service {
 	if prefix == "" {
 		prefix = "/compute/v2.1"
 	}
 	return &service{
-		IdentityClient: identityClient,
-		ComputeClient:  computeClient,
-		K8SClient:      k8sClient,
-		Prefix:         prefix,
-		ServerID:       serverID,
-		TokenManager:   tm,
+		Client:       client,
+		K8SClient:    k8sClient,
+		Prefix:       prefix,
+		ServerID:     serverID,
+		TokenManager: tm,
 	}
 }
 
@@ -79,7 +77,7 @@ func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
 	}
 	router.Use(middleware.NewMicroVersionHandler("compute", "X-OpenStack-Nova-API-Version", min, max).Handler())
 
-	router.Use(middleware.NewTokenHandler(svc.TokenManager, svc.IdentityClient).Handler())
+	router.Use(middleware.NewTokenHandler(svc.TokenManager, svc.Client.Identity()).Handler())
 
 	//router.GET("/", svc.IndexShow)
 	router.GET("/", svc.VersionIndexShow)

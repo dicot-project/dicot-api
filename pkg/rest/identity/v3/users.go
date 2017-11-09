@@ -76,7 +76,7 @@ type UserShowRes struct {
 func (svc *service) UserList(c *gin.Context) {
 	name := c.Query("name")
 
-	clnt := identity.NewUserClient(svc.IdentityClient, k8sv1.NamespaceAll)
+	clnt := svc.Client.Identity().Users(k8sv1.NamespaceAll)
 
 	users, err := clnt.List()
 	if err != nil {
@@ -120,7 +120,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 		return
 	}
 
-	domClnt := identity.NewProjectClient(svc.IdentityClient, v1.NamespaceSystem)
+	domClnt := svc.Client.Identity().Projects(v1.NamespaceSystem)
 
 	var domNamespace string
 	if req.User.DomainID != "" {
@@ -139,7 +139,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 		domNamespace = dom.Spec.Namespace
 	}
 
-	clnt := identity.NewUserClient(svc.IdentityClient, domNamespace)
+	clnt := svc.Client.Identity().Users(domNamespace)
 
 	exists, err := clnt.Exists(req.User.Name)
 	if err != nil {
@@ -218,7 +218,7 @@ func (svc *service) UserCreate(c *gin.Context) {
 func (svc *service) UserShow(c *gin.Context) {
 	userID := c.Param("userID")
 
-	clnt := identity.NewUserClient(svc.IdentityClient, k8sv1.NamespaceAll)
+	clnt := svc.Client.Identity().Users(k8sv1.NamespaceAll)
 
 	user, err := clnt.GetByUID(userID)
 	if err != nil {
@@ -259,7 +259,7 @@ func (svc *service) UserUpdate(c *gin.Context) {
 
 	userID := c.Param("userID")
 
-	clnt := identity.NewUserClient(svc.IdentityClient, k8sv1.NamespaceAll)
+	clnt := svc.Client.Identity().Users(k8sv1.NamespaceAll)
 
 	user, err := clnt.GetByUID(userID)
 	if err != nil {
@@ -271,7 +271,7 @@ func (svc *service) UserUpdate(c *gin.Context) {
 		return
 	}
 
-	clnt = identity.NewUserClient(svc.IdentityClient, user.ObjectMeta.Namespace)
+	clnt = svc.Client.Identity().Users(user.ObjectMeta.Namespace)
 
 	if req.User.Name != nil {
 		c.AbortWithStatus(http.StatusForbidden)
@@ -359,7 +359,7 @@ func (svc *service) UserUpdate(c *gin.Context) {
 func (svc *service) UserDelete(c *gin.Context) {
 	userID := c.Param("userID")
 
-	clnt := identity.NewUserClient(svc.IdentityClient, k8sv1.NamespaceAll)
+	clnt := svc.Client.Identity().Users(k8sv1.NamespaceAll)
 
 	user, err := clnt.GetByUID(userID)
 	if err != nil {
@@ -371,7 +371,7 @@ func (svc *service) UserDelete(c *gin.Context) {
 		return
 	}
 
-	clnt = identity.NewUserClient(svc.IdentityClient, user.ObjectMeta.Namespace)
+	clnt = svc.Client.Identity().Users(user.ObjectMeta.Namespace)
 
 	err = svc.K8SClient.CoreV1().Secrets(user.ObjectMeta.Namespace).Delete(
 		user.Spec.Password.SecretRef, nil)

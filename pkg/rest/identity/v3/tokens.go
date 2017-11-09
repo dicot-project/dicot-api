@@ -136,7 +136,7 @@ func (svc *service) TokensPost(c *gin.Context) {
 		return
 	}
 
-	domClnt := identity.NewProjectClient(svc.IdentityClient, v1.NamespaceSystem)
+	domClnt := svc.Client.Identity().Projects(v1.NamespaceSystem)
 	var userDomain *v1.Project
 	if req.Auth.Identity.Password.User.Domain.Name != "" {
 		userDomain, err = domClnt.Get(req.Auth.Identity.Password.User.Domain.Name)
@@ -156,7 +156,7 @@ func (svc *service) TokensPost(c *gin.Context) {
 	}
 	userNamespace := identity.FormatDomainNamespace(userDomain.ObjectMeta.Name)
 
-	userClnt := identity.NewUserClient(svc.IdentityClient, userNamespace)
+	userClnt := svc.Client.Identity().Users(userNamespace)
 
 	var user *v1.User
 	if req.Auth.Identity.Password.User.Name != "" {
@@ -206,7 +206,7 @@ func (svc *service) TokensPost(c *gin.Context) {
 	}
 	projectNamespace := identity.FormatDomainNamespace(projectDomain.ObjectMeta.Name)
 
-	projectClnt := identity.NewProjectClient(svc.IdentityClient, projectNamespace)
+	projectClnt := svc.Client.Identity().Projects(projectNamespace)
 
 	var project *v1.Project
 	if req.Auth.Scope.Project.Name != "" {

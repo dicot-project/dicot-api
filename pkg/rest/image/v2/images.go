@@ -176,7 +176,7 @@ func ImageAccessible(img *v1.Image, proj *identityv1.Project) bool {
 func (svc *service) ImageList(c *gin.Context) {
 	proj := middleware.RequiredTokenScopeProject(c)
 
-	clnt := image.NewImageClient(svc.ImageClient, k8sv1.NamespaceAll)
+	clnt := svc.Client.Image().Images(k8sv1.NamespaceAll)
 
 	imgs, err := clnt.List()
 	if err != nil {
@@ -229,7 +229,7 @@ func (svc *service) ImageCreate(c *gin.Context) {
 		return
 	}
 
-	clnt := image.NewImageClient(svc.ImageClient, k8sv1.NamespaceAll)
+	clnt := svc.Client.Image().Images(k8sv1.NamespaceAll)
 
 	if req.ID == "" {
 		req.ID = string(uuid.NewUUID())
@@ -246,7 +246,7 @@ func (svc *service) ImageCreate(c *gin.Context) {
 		}
 	}
 
-	clnt = image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+	clnt = svc.Client.Image().Images(proj.Spec.Namespace)
 
 	if req.Name != nil {
 		img, err := clnt.Get(*req.Name)
@@ -355,7 +355,7 @@ func (svc *service) ImageShow(c *gin.Context) {
 	proj := middleware.RequiredTokenScopeProject(c)
 	imgID := c.Param("imageID")
 
-	clnt := image.NewImageClient(svc.ImageClient, k8sv1.NamespaceAll)
+	clnt := svc.Client.Image().Images(k8sv1.NamespaceAll)
 
 	img, err := clnt.GetByID(imgID)
 	if err != nil {
@@ -401,7 +401,7 @@ func (svc *service) ImageDelete(c *gin.Context) {
 	proj := middleware.RequiredTokenScopeProject(c)
 	imgID := c.Param("imageID")
 
-	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+	clnt := svc.Client.Image().Images(proj.Spec.Namespace)
 
 	img, err := clnt.GetByID(imgID)
 	if err != nil {
@@ -438,7 +438,7 @@ func (svc *service) ImagePatch(c *gin.Context) {
 		return
 	}
 
-	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+	clnt := svc.Client.Image().Images(proj.Spec.Namespace)
 
 	img, err := clnt.GetByID(imgID)
 	if err != nil {
@@ -558,7 +558,7 @@ func (svc *service) ImageDeactivate(c *gin.Context) {
 	proj := middleware.RequiredTokenScopeProject(c)
 	imgID := c.Param("imageID")
 
-	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+	clnt := svc.Client.Image().Images(proj.Spec.Namespace)
 
 	img, err := clnt.GetByID(imgID)
 	if err != nil {
@@ -595,7 +595,7 @@ func (svc *service) ImageReactivate(c *gin.Context) {
 	proj := middleware.RequiredTokenScopeProject(c)
 	imgID := c.Param("imageID")
 
-	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+	clnt := svc.Client.Image().Images(proj.Spec.Namespace)
 
 	img, err := clnt.GetByID(imgID)
 	if err != nil {
@@ -633,7 +633,7 @@ func (svc *service) ImageTagAdd(c *gin.Context) {
 	imgID := c.Param("imageID")
 	tag := c.Param("tag")
 
-	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+	clnt := svc.Client.Image().Images(proj.Spec.Namespace)
 
 	img, err := clnt.GetByID(imgID)
 	if err != nil {
@@ -671,7 +671,7 @@ func (svc *service) ImageTagDelete(c *gin.Context) {
 	imgID := c.Param("imageID")
 	tag := c.Param("tag")
 
-	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+	clnt := svc.Client.Image().Images(proj.Spec.Namespace)
 
 	img, err := clnt.GetByID(imgID)
 	if err != nil {
@@ -710,7 +710,7 @@ func (svc *service) ImageDataUpload(c *gin.Context) {
 	proj := middleware.RequiredTokenScopeProject(c)
 	imgID := c.Param("imageID")
 
-	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+	clnt := svc.Client.Image().Images(proj.Spec.Namespace)
 
 	img, err := clnt.GetByID(imgID)
 	if err != nil {
@@ -775,7 +775,7 @@ func (svc *service) ImageDataDownload(c *gin.Context) {
 	proj := middleware.RequiredTokenScopeProject(c)
 	imgID := c.Param("imageID")
 
-	clnt := image.NewImageClient(svc.ImageClient, proj.Spec.Namespace)
+	clnt := svc.Client.Image().Images(proj.Spec.Namespace)
 
 	_, err := clnt.GetByID(imgID)
 	if err != nil {

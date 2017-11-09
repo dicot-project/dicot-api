@@ -22,31 +22,31 @@ package v3
 import (
 	"github.com/gin-gonic/gin"
 	k8s "k8s.io/client-go/kubernetes"
-	k8srest "k8s.io/client-go/rest"
 
+	"github.com/dicot-project/dicot-api/pkg/api"
 	"github.com/dicot-project/dicot-api/pkg/auth"
 	"github.com/dicot-project/dicot-api/pkg/rest"
 	"github.com/dicot-project/dicot-api/pkg/rest/middleware"
 )
 
 type service struct {
-	IdentityClient k8srest.Interface
-	K8SClient      k8s.Interface
-	Prefix         string
-	Services       *rest.ServiceList
-	TokenManager   auth.TokenManager
+	Client       api.Interface
+	K8SClient    k8s.Interface
+	Prefix       string
+	Services     *rest.ServiceList
+	TokenManager auth.TokenManager
 }
 
-func NewService(identityClient k8srest.Interface, k8sClient k8s.Interface, tm auth.TokenManager, svcs *rest.ServiceList, prefix string) rest.Service {
+func NewService(client api.Interface, k8sClient k8s.Interface, tm auth.TokenManager, svcs *rest.ServiceList, prefix string) rest.Service {
 	if prefix == "" {
 		prefix = "/identity/v3"
 	}
 	return &service{
-		IdentityClient: identityClient,
-		K8SClient:      k8sClient,
-		Prefix:         prefix,
-		Services:       svcs,
-		TokenManager:   tm,
+		Client:       client,
+		K8SClient:    k8sClient,
+		Prefix:       prefix,
+		Services:     svcs,
+		TokenManager: tm,
 	}
 }
 
@@ -67,8 +67,8 @@ func (svc *service) GetUID() string {
 }
 
 func (svc *service) RegisterRoutes(router *gin.RouterGroup) {
-	tokNoAnon := middleware.NewTokenHandler(svc.TokenManager, svc.IdentityClient).Handler()
-	tokAllowAnon := middleware.NewTokenHandlerAllowAnon(svc.TokenManager, svc.IdentityClient).Handler()
+	tokNoAnon := middleware.NewTokenHandler(svc.TokenManager, svc.Client.Identity()).Handler()
+	tokAllowAnon := middleware.NewTokenHandlerAllowAnon(svc.TokenManager, svc.Client.Identity()).Handler()
 
 	router.GET("/", svc.IndexGet)
 	router.POST("/auth/tokens", tokAllowAnon, svc.TokensPost)

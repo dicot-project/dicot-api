@@ -34,17 +34,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/glog"
 	"github.com/spf13/pflag"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
 	k8s "k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/kubernetes/scheme"
 	k8srest "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	computeapiv1 "github.com/dicot-project/dicot-api/pkg/api/compute/v1"
-	identityapiv1 "github.com/dicot-project/dicot-api/pkg/api/identity/v1"
-	imageapiv1 "github.com/dicot-project/dicot-api/pkg/api/image/v1"
+	"github.com/dicot-project/dicot-api/pkg/api"
+	"github.com/dicot-project/dicot-api/pkg/api/identity"
 	"github.com/dicot-project/dicot-api/pkg/auth"
 	"github.com/dicot-project/dicot-api/pkg/rest"
 	computev2_1 "github.com/dicot-project/dicot-api/pkg/rest/compute/v2_1"
@@ -59,35 +54,13 @@ func GetClientConfig(kubeconfig string) (*k8srest.Config, error) {
 	return k8srest.InClusterConfig()
 }
 
-func GetDicotClient(kubeconfig string, version *schema.GroupVersion) (k8srest.Interface, error) {
+func GetDicotClient(kubeconfig string) (api.Interface, error) {
 	config, err := GetClientConfig(kubeconfig)
 	if err != nil {
 		return nil, err
 	}
 
-	config.GroupVersion = version
-	config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
-	config.APIPath = "/apis"
-	config.ContentType = runtime.ContentTypeJSON
-
-	restclient, err := k8srest.RESTClientFor(config)
-	if err != nil {
-		return nil, err
-	}
-
-	return restclient, nil
-}
-
-func GetDicotIdentityClient(kubeconfig string) (k8srest.Interface, error) {
-	return GetDicotClient(kubeconfig, &identityapiv1.GroupVersion)
-}
-
-func GetDicotComputeClient(kubeconfig string) (k8srest.Interface, error) {
-	return GetDicotClient(kubeconfig, &computeapiv1.GroupVersion)
-}
-
-func GetDicotImageClient(kubeconfig string) (k8srest.Interface, error) {
-	return GetDicotClient(kubeconfig, &imageapiv1.GroupVersion)
+	return api.NewClientset(config)
 }
 
 func GetKubernetesClient(kubeconfig string) (k8s.Interface, error) {
@@ -99,7 +72,7 @@ func GetKubernetesClient(kubeconfig string) (k8s.Interface, error) {
 	return k8s.NewForConfig(config)
 }
 
-func GetTokenManager(cl k8srest.Interface) (auth.TokenManager, error) {
+func GetTokenManager(cl identity.Interface) (auth.TokenManager, error) {
 	key, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
 	if err != nil {
 		return nil, err
@@ -138,24 +111,16 @@ func main() {
 		router.Use(gin.Logger())
 	}
 
-	identityclient, err := GetDicotIdentityClient(kubeconfig)
+	client, err := GetDicotClient(kubeconfig)
 	if err != nil {
-		log.Fatal("Kube client: %s\n", err)
-	}
-	computeclient, err := GetDicotComputeClient(kubeconfig)
-	if err != nil {
-		log.Fatal("Kube client: %s\n", err)
-	}
-	imageclient, err := GetDicotImageClient(kubeconfig)
-	if err != nil {
-		log.Fatal("Kube client: %s\n", err)
+		log.Fatal("Dicot client: %s\n", err)
 	}
 	k8sClient, err := GetKubernetesClient(kubeconfig)
 	if err != nil {
 		log.Fatal("Kube client: %s\n", err)
 	}
 
-	tm, err := GetTokenManager(identityclient)
+	tm, err := GetTokenManager(client.Identity())
 	if err != nil {
 		log.Fatal("Token manager: %s\n", err)
 	}
@@ -163,9 +128,9 @@ func main() {
 	serverID := "e1552b45-f0cb-4d2b-bfb9-ae0877696e39"
 
 	services := &rest.ServiceList{}
-	services.AddService(identityv3.NewService(identityclient, k8sClient, tm, services, ""))
-	services.AddService(computev2_1.NewService(identityclient, computeclient, k8sClient, tm, serverID, ""))
-	services.AddService(imagev2.NewService(identityclient, imageclient, tm, imagerepo, serverID, ""))
+	services.AddService(identityv3.NewService(client, k8sClient, tm, services, ""))
+	services.AddService(computev2_1.NewService(client, k8sClient, tm, serverID, ""))
+	services.AddService(imagev2.NewService(client, tm, imagerepo, serverID, ""))
 	services.RegisterRoutes(router)
 
 	srv := &http.Server{
