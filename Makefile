@@ -39,12 +39,13 @@ manifests/050-identity-project.yaml: manifests/050-identity-project.yaml.in conf
 
 conf: manifests/050-identity-project.yaml conf/identity_admin
 
-.vendor.status: Gopkg.toml Gopkg.lock
-	dep ensure -vendor-only && touch .vendor.status
+.vendor.status: glide.yaml glide.lock
+	glide install --strip-vendor && touch .vendor.status
 
-dep-update:
-	rm -rf Gopkg.lock .vendor.status vendor
-	dep ensure && touch .vendor.status
+glide-update:
+	rm -rf glide.lock .vendor.status vendor
+	glide cc
+	glide update --strip-vendor && touch .vendor.status
 
 clean:
 	rm -rf vendor
