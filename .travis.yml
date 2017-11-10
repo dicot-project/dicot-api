@@ -21,10 +21,10 @@ cache:
 
 notifications:
   irc:
-    # The channel name "irc.oftc.net#dicot" is encrypted against dicot-project/dicot-api
+    # The channel name "irc.freenode.net#dicot" is encrypted against dicot-project/dicot-api
     # to prevent IRC notifications from github forks. This was created using:
-    # $ travis encrypt -r "dicot-project/dicot-api" "irc.oftc.net#dicot"
+    # $ travis encrypt -r "dicot-project/dicot-api" "irc.freenode.net#dicot"
     channels:
-      - secure: "pRHJ+serJWqjsbq9d+ng6HYrNoMAAfzOB1u8QqhONKT390SzHO142yYqL/iIn9eTiP9oGpwYMv8vK7DJMi722VdUvC1VRdF5fMXM46A16pG94XRchatbltInL9WqAto8bWv1tOzo7e3hWI1VT6JZ/V+3qqIKPR56GUpCPuqmYnPiSzRwt/21zkD14XDCX7JLlzcRF+NMavZzRrF6C8PB1wbUziAhGgW6xHhlGLz3X16LFdeIKbdZTeGEWFM6J+orwdUNWLpYuB2tetzGOovyg7ODu2LtmqrVwB4Gvw0hoeyj19uQqoD483dFSvawoFSJQB5k811yjJUGvazlcJ9A/8fQDCRc8NB85Eh1pJN94j8e1rMcviTOfKaRvyVOJfrVQAbajB+qWxyWkmMw28X6jeBXd6hKGSnNyG+DE/2keh0Ghg+CpUy6ItLYcdceA2OS+vbXrC6JgKttvQ9OldL1ZnJdLwfk4L+GAjP31jtTryJGiaeL+lGkRDoyQI/HWUtHIXmo4BFnwIUHufQcwWgEyo42XMuJ0odnfVKxkfQ2UioxW79J1bfN30dluDVJ+snKR50Dwpv+1lQRym2EwL4Jt3sfviv/4/X5jFqxbrXcERpTSOn0j9p/PpuvyH2HaDc+QXC3uHW89SizNQsK9HKNCn/iAGM9WygUSj6cepVgojE="
+      - secure: "QbzHdmjCKLdIQUMZ6aA23hNdXMhSPRjpcHJ4u/1E6sQuRtd2C0ARVQQv3cNt+c71n6x3gwFvCInXjZ6Vpq5bOHme9V9CyFqefak/DVoFnqAzgU1JgmCBVf9MBGpv00rbzHoHV1aYLwsavZOJLMFF6aFjmvsr5sHrzZPKxdfSqZP+W3vyAzXUogwJbzxWNK8FYlf8exYNn7JoWmF6RLMxAXeAz3SIth/uHQtblW9KuWngjWhc/KCPusDaEHWqQUrEt3UasrZ5Lw10Q5NHD31o24HJiTdd7haq2fMiZs0P/A1wbU7/pCQhO5GkhUVp/2FtoYq0zzitzyWuf1lkEKY0fzsk2BGD/6pQq1dCbc9flMhruTemcpu8+SJmjQwcPYEPsk/KFvvT1jHUqK8eeBY6xfBIsqsXJWA8k414hJVQRwvk1hYMlBqaG2Z8ZV0gOJ84R6XxMSyvZ7iw9ns7/FecnyX+smQmE9mhyy0RseLh/nft0cCG99ADlOwTE9sqciWl1z3D9R1hvKloxNlg+ikuKbeKNuGC0qO7zI9F8o4d7ksTCg+0hAYKeGWvCdmrk0KtwLZ91MdK2T68XPVJIGmOUO8qPzlPPGtAdmhxZj4QpAgy5SALTPhGfiiTklIKP35mRh0hVvCyaggurP7wzS28oDFOLuYAW8rDH1kvb6vl9A=="
     on_success: change
     on_failure: always
